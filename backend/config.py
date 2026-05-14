@@ -17,9 +17,13 @@ class Config:
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    FRONTEND_ORIGIN = os.getenv("FRONTEND_ORIGIN", "http://127.0.0.1:5173")
+    FRONTEND_URL = os.getenv(
+        "FRONTEND_URL",
+        os.getenv("FRONTEND_ORIGIN", "http://localhost:5173"),
+    )
+    FRONTEND_ORIGIN = os.getenv("FRONTEND_ORIGIN", FRONTEND_URL)
     FRONTEND_ORIGINS = [
-        FRONTEND_ORIGIN,
+        FRONTEND_URL,
         "http://localhost:5173",
         "http://127.0.0.1:5173",
         "http://localhost:5174",

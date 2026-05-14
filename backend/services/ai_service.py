@@ -57,15 +57,14 @@ class PricingAiService:
         except requests.RequestException as error:
             response = getattr(error, "response", None)
             if response is not None:
-                print(f"Status OpenRouter: {response.status_code}")
-                print(f"Body erro OpenRouter: {response.text}")
+                print("OpenRouter retornou erro HTTP.", flush=True)
             else:
-                print(f"Erro OpenRouter: {type(error).__name__} - {str(error)[:500]}")
-            print("Traceback OpenRouter:")
+                print(f"Erro OpenRouter: {type(error).__name__} - {str(error)[:500]}", flush=True)
+            print("Traceback OpenRouter:", flush=True)
             traceback.print_exc()
             return {"success": False, "answer": AI_FALLBACK_ANSWER}
         except (KeyError, IndexError, TypeError, ValueError):
-            print("Erro ao processar resposta da OpenRouter:")
+            print("Erro ao processar resposta da OpenRouter:", flush=True)
             traceback.print_exc()
             return {"success": False, "answer": AI_FALLBACK_ANSWER}
 
@@ -80,17 +79,17 @@ class PricingAiService:
             json=self.build_openrouter_payload(payload),
             timeout=30,
         )
-        print(f"Status OpenRouter: {response.status_code}")
+        print(f"Status OpenRouter: {response.status_code}", flush=True)
         if response.status_code != 200:
-            print(f"Body erro OpenRouter: {response.text}")
+            print(f"Body erro OpenRouter: {response.text}", flush=True)
         response.raise_for_status()
         response_payload = response.json()
         return clean_ai_answer(response_payload["choices"][0]["message"]["content"])
 
     def log_openrouter_config(self) -> None:
-        print(f"OPENROUTER_API_KEY carregada: {mask_api_key(self.api_key)}")
-        print(f"OPENROUTER_MODEL carregado: {self.model}")
-        print(f"OPENROUTER_SITE_URL carregado: {self.site_url}")
+        print(f"OPENROUTER_API_KEY carregada: {mask_api_key(self.api_key)}", flush=True)
+        print(f"OPENROUTER_MODEL carregado: {self.model}", flush=True)
+        print(f"OPENROUTER_SITE_URL carregado: {self.site_url}", flush=True)
 
     def build_headers(self) -> dict[str, str]:
         headers = {

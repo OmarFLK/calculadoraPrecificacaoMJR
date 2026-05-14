@@ -28,6 +28,7 @@ def analyze_project(current_user: User):
 
 @ai_bp.post("/chat")
 def chat():
+    print("POST /ai/chat recebido", flush=True)
     payload = request.get_json(silent=True) or {}
     ai_service = PricingAiService(
         api_key=current_app.config["OPENROUTER_API_KEY"],

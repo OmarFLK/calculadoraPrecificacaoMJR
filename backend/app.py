@@ -42,6 +42,8 @@ def create_app(config_class: type[Config] = Config) -> Flask:
         app,
         resources={r"/*": {"origins": app.config["FRONTEND_ORIGINS"]}},
         supports_credentials=True,
+        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allow_headers=["Content-Type", "Authorization"],
     )
 
     register_blueprints(app)
