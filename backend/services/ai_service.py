@@ -1,4 +1,5 @@
 import re
+import traceback
 from typing import Any
 
 import requests
@@ -46,8 +47,7 @@ class PricingAiService:
         if not message:
             return {"success": False, "answer": "Envie uma mensagem para consultar a IA."}
 
-        print(f"API key carregada: {'YES' if bool(self.api_key) else 'NO'}")
-        print(f"Modelo: {self.model}")
+        self.log_openrouter_config()
 
         if not self.api_key:
             return {"success": False, "answer": MISSING_OPENROUTER_KEY_ANSWER}
@@ -58,11 +58,15 @@ class PricingAiService:
             response = getattr(error, "response", None)
             if response is not None:
                 print(f"Status OpenRouter: {response.status_code}")
-                print(f"Resposta erro OpenRouter: {response.text[:500]}")
+                print(f"Body erro OpenRouter: {response.text}")
             else:
                 print(f"Erro OpenRouter: {type(error).__name__} - {str(error)[:500]}")
+            print("Traceback OpenRouter:")
+            traceback.print_exc()
             return {"success": False, "answer": AI_FALLBACK_ANSWER}
         except (KeyError, IndexError, TypeError, ValueError):
+            print("Erro ao processar resposta da OpenRouter:")
+            traceback.print_exc()
             return {"success": False, "answer": AI_FALLBACK_ANSWER}
 
         return {"success": True, "answer": answer}
@@ -77,9 +81,16 @@ class PricingAiService:
             timeout=30,
         )
         print(f"Status OpenRouter: {response.status_code}")
+        if response.status_code != 200:
+            print(f"Body erro OpenRouter: {response.text}")
         response.raise_for_status()
         response_payload = response.json()
         return clean_ai_answer(response_payload["choices"][0]["message"]["content"])
+
+    def log_openrouter_config(self) -> None:
+        print(f"OPENROUTER_API_KEY carregada: {mask_api_key(self.api_key)}")
+        print(f"OPENROUTER_MODEL carregado: {self.model}")
+        print(f"OPENROUTER_SITE_URL carregado: {self.site_url}")
 
     def build_headers(self) -> dict[str, str]:
         headers = {
@@ -103,6 +114,13 @@ class PricingAiService:
 
 def build_user_message(payload: dict[str, Any]) -> str:
     return str(payload.get("message", "")).strip()
+
+
+def mask_api_key(api_key: str) -> str:
+    if not api_key:
+        return "Não"
+
+    return f"Sim ({api_key[:8]}...)"
 
 
 def clean_ai_answer(answer: str) -> str:
