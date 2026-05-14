@@ -290,9 +290,11 @@ p {
 
 .assistant-column {
   display: grid;
-  height: var(--assistant-card-height, auto);
+  height: var(--assistant-card-height, 660px);
+  max-height: var(--assistant-card-height, 660px);
   min-height: 0;
   min-width: 0;
+  overflow: hidden;
   gap: 18px;
 }
 
@@ -677,8 +679,9 @@ p {
 .ai-card {
   display: flex;
   height: 100%;
-  min-height: 100%;
-  max-height: var(--assistant-card-height, none);
+  min-height: 0;
+  max-height: 100%;
+  overflow: hidden;
   flex-direction: column;
 }
 
@@ -779,12 +782,13 @@ p {
 .assistant-thread {
   display: flex;
   min-height: 0;
-  flex: 1 1 auto;
+  flex: 1 1 0;
   flex-direction: column;
   gap: 12px;
   margin: 18px 20px 0;
   padding: 14px;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-gutter: stable;
   background: #f3f7fc;
