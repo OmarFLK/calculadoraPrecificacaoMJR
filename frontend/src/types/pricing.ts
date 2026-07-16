@@ -14,6 +14,14 @@ export type Complexity =
   | "Alta"
   | "Muito alta";
 
+export type CostFieldValue = number | "";
+
+export interface AdditionalCost {
+  id: string;
+  description: string;
+  amount: CostFieldValue;
+}
+
 export interface PricingProject {
   id: string;
   nucleus: Nucleus | "";
@@ -30,6 +38,8 @@ export interface PricingProject {
   desiredProfitMargin: number | "";
   taxes: number | "";
   extraCosts: number | "";
+  costValues: Record<string, CostFieldValue>;
+  additionalCosts: AdditionalCost[];
   complexity: Complexity | "";
   complexityMultiplier: number | "";
   context: string;
@@ -38,6 +48,7 @@ export interface PricingProject {
 
 export interface PricingCalculation {
   custoBase: number;
+  custosDinamicos: number;
   valorMargem: number;
   valorImpostos: number;
   multiplicador: number;

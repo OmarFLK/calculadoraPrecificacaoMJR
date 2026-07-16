@@ -1,6 +1,14 @@
 import { FileText, Plus, RotateCcw, Save, Trash2 } from "lucide-react";
+import DynamicCostFields from "./DynamicCostFields";
+import { getUniversalCostValueIds } from "../data/costFields";
 import { COMPLEXITY_MULTIPLIERS, NUCLEUS_SERVICES, TIME_UNITS } from "../data/services";
-import type { Complexity, Nucleus, PricingProject } from "../types/pricing";
+import type {
+  AdditionalCost,
+  Complexity,
+  CostFieldValue,
+  Nucleus,
+  PricingProject,
+} from "../types/pricing";
 
 interface PricingFormProps {
   project: PricingProject;
@@ -22,8 +30,7 @@ type NumericField =
   | "weeklyHoursAverage"
   | "hourValue"
   | "desiredProfitMargin"
-  | "taxes"
-  | "extraCosts";
+  | "taxes";
 
 export default function PricingForm({
   project,
@@ -42,7 +49,26 @@ export default function PricingForm({
   };
 
   const updateNucleus = (nucleus: Nucleus | "") => {
-    onUpdateProject(project.id, { nucleus, service: "" });
+    const universalCostIds = getUniversalCostValueIds();
+    const costValues = Object.fromEntries(
+      Object.entries(project.costValues).filter(([fieldId]) => universalCostIds.has(fieldId)),
+    );
+
+    onUpdateProject(project.id, { nucleus, service: "", costValues });
+  };
+
+  const updateCostValue = (fieldId: string, value: CostFieldValue) => {
+    onUpdateProject(project.id, {
+      costValues: { ...project.costValues, [fieldId]: value },
+    });
+  };
+
+  const updateAdditionalCosts = (additionalCosts: AdditionalCost[]) => {
+    const extraCosts = additionalCosts.reduce(
+      (total, cost) => total + (cost.amount === "" ? 0 : cost.amount),
+      0,
+    );
+    onUpdateProject(project.id, { additionalCosts, extraCosts });
   };
 
   const updateComplexity = (complexity: Complexity | "") => {
@@ -103,7 +129,7 @@ export default function PricingForm({
           placeholder="Ex: Sistema interno de indicadores"
         />
 
-        <div className="form-grid three-columns">
+        <div className="form-grid two-columns">
           <NumberField
             label="Valor cobrado"
             value={project.chargedValue}
@@ -116,13 +142,15 @@ export default function PricingForm({
             onChange={(value) => updateNumber("referenceTicket", value)}
             placeholder="R$"
           />
-          <NumberField
-            label="Custos extras"
-            value={project.extraCosts}
-            onChange={(value) => updateNumber("extraCosts", value)}
-            placeholder="R$"
-          />
         </div>
+
+        <DynamicCostFields
+          area={project.nucleus}
+          values={project.costValues}
+          additionalCosts={project.additionalCosts}
+          onChangeValue={updateCostValue}
+          onChangeAdditionalCosts={updateAdditionalCosts}
+        />
 
         <div className="form-grid three-columns">
           <NumberField

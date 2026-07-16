@@ -31,12 +31,13 @@ export default function ResultCard({ project }: ResultCardProps) {
         <Metric label="Custo base" value={formatCurrency(calculation.custoBase)} />
         <Metric label="Valor com margem" value={formatCurrency(calculation.valorMargem)} />
         <Metric label="Valor com impostos" value={formatCurrency(calculation.valorImpostos)} />
+        <Metric label="Custos do projeto" value={formatCurrency(calculation.custosDinamicos)} />
         <Metric label="Multiplicador" value={calculation.multiplicador.toFixed(2)} />
       </dl>
 
       <div className="result-note">
         <TrendingUp size={16} aria-hidden="true" />
-        <span>Baseado em horas, valor/hora, margem, impostos, complexidade e custos extras.</span>
+        <span>Baseado em horas, margem, impostos, complexidade e custos configurados.</span>
       </div>
     </section>
   );
