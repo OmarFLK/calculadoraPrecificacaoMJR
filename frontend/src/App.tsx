@@ -142,7 +142,7 @@ export default function App() {
           </div>
 
           <aside className="assistant-column">
-            <AiAssistant project={activeProject} />
+            <AiAssistant project={activeProject} projects={projects} />
           </aside>
         </div>
 

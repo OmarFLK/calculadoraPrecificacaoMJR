@@ -25,7 +25,7 @@ copy .env.example .env
 ```
 
 Edite `DATABASE_URL` no `.env` para apontar para seu PostgreSQL local.
-Para IA real no chat, configure `OPENROUTER_API_KEY`.
+Para IA real no chat, configure `OPENAI_API_KEY`.
 Para consultar demanda comercial, configure `MONDAY_API_KEY` com um token que tenha
 acesso de leitura ao board desejado.
 
@@ -140,9 +140,20 @@ O comando informa quantas linhas foram criadas, atualizadas ou ignoradas e o mot
 de cada rejeição. O campo externo `id` torna reimportações idempotentes. A sugestão
 de preço usa a mediana de `charged_value` por área.
 
+## Assistente OpenAI
+
+`POST /ai/chat` usa a Responses API com `gpt-5.6-luna` por padrão. O backend
+limita a saída com `OPENAI_MAX_OUTPUT_TOKENS`, envia apenas o resumo do projeto e
+até seis mensagens recentes, desativa o armazenamento da resposta e registra os
+tokens de entrada e saída somente no log da aplicação. O esforço de raciocínio
+fica em `none` por padrão para reduzir latência e consumo nesse fluxo curto.
+
+Referências oficiais: [Responses API](https://developers.openai.com/api/docs/guides/text)
+e [catálogo de modelos](https://developers.openai.com/api/docs/models).
+
 ## Limitações atuais
 
-- `/ai/chat` usa OpenRouter quando `OPENROUTER_API_KEY` estiver configurada e retorna fallback amigável em caso de erro.
+- `/ai/chat` exige `OPENAI_API_KEY` para chamadas reais e retorna fallback amigável em caso de erro.
 - `/ai/analyze` segue como análise mockada e registra log em `ai_analysis_logs`.
 - Google Drive ainda salva apenas `drive_link`.
 - O client do Monday está pronto, mas exige token e board reais para o smoke test externo.

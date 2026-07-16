@@ -36,11 +36,16 @@ class Config:
         os.getenv("MONDAY_REQUEST_TIMEOUT_SECONDS", "10")
     )
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
-    OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")
-    OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
-    OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "openrouter/free")
-    OPENROUTER_SITE_URL = os.getenv("OPENROUTER_SITE_URL", "http://localhost:5173")
-    OPENROUTER_APP_TITLE = os.getenv("OPENROUTER_APP_TITLE", "Maua Jr Pricing AI")
+    OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-5.6-luna")
+    OPENAI_RESPONSES_URL = os.getenv(
+        "OPENAI_RESPONSES_URL",
+        "https://api.openai.com/v1/responses",
+    )
+    OPENAI_MAX_OUTPUT_TOKENS = int(os.getenv("OPENAI_MAX_OUTPUT_TOKENS", "320"))
+    OPENAI_REASONING_EFFORT = os.getenv("OPENAI_REASONING_EFFORT", "none")
+    OPENAI_REQUEST_TIMEOUT_SECONDS = float(
+        os.getenv("OPENAI_REQUEST_TIMEOUT_SECONDS", "30")
+    )
 
 
 class TestConfig(Config):

@@ -1,5 +1,10 @@
 import { Bot, Loader2, Send } from "lucide-react";
 import { FormEvent, useEffect, useRef, useState } from "react";
+import {
+  calculateDynamicCosts,
+  calculateHistoricalSuggestion,
+  calculateSuggestedPrice,
+} from "../logic/pricingCalculations";
 import type { PricingProject } from "../types/pricing";
 
 const apiBaseUrl = import.meta.env.VITE_API_URL ?? "http://127.0.0.1:5000";
@@ -9,6 +14,7 @@ const friendlyErrorMessage = "Não foi possível consultar a IA no momento. Tent
 
 interface AiAssistantProps {
   project: PricingProject;
+  projects: PricingProject[];
 }
 
 interface ChatMessage {
@@ -17,7 +23,12 @@ interface ChatMessage {
   label: string;
 }
 
-export default function AiAssistant({ project }: AiAssistantProps) {
+interface ConversationMessage {
+  role: "assistant" | "user";
+  content: string;
+}
+
+export default function AiAssistant({ project, projects }: AiAssistantProps) {
   const threadRef = useRef<HTMLDivElement | null>(null);
   const [prompt, setPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -48,7 +59,16 @@ export default function AiAssistant({ project }: AiAssistantProps) {
       { author: "user", content: trimmedPrompt, label: "Você" },
     ]);
 
-    const answer = await fetchAiAnswer(trimmedPrompt, project);
+    const conversation = messages.slice(-6).map<ConversationMessage>((message) => ({
+      role: message.author === "ai" ? "assistant" : "user",
+      content: message.content,
+    }));
+    const answer = await fetchAiAnswer(
+      trimmedPrompt,
+      project,
+      projects,
+      conversation,
+    );
 
     setMessages((currentMessages) => [
       ...currentMessages,
@@ -64,7 +84,7 @@ export default function AiAssistant({ project }: AiAssistantProps) {
           <Bot size={20} aria-hidden="true" />
         </div>
         <div>
-          <p className="section-kicker">OpenRouter</p>
+          <p className="section-kicker">OpenAI</p>
           <h2 id="ai-title">Assistente IA de Precificação</h2>
         </div>
       </div>
@@ -107,12 +127,17 @@ export default function AiAssistant({ project }: AiAssistantProps) {
   );
 }
 
-async function fetchAiAnswer(message: string, project: PricingProject) {
+async function fetchAiAnswer(
+  message: string,
+  project: PricingProject,
+  projects: PricingProject[],
+  conversation: ConversationMessage[],
+) {
   try {
     const response = await fetch(`${apiBaseUrl}/ai/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(buildChatPayload(message, project)),
+      body: JSON.stringify(buildChatPayload(message, project, projects, conversation)),
     });
     const payload = (await response.json()) as { success?: boolean; answer?: string };
 
@@ -126,11 +151,22 @@ async function fetchAiAnswer(message: string, project: PricingProject) {
   }
 }
 
-function buildChatPayload(message: string, project: PricingProject) {
+function buildChatPayload(
+  message: string,
+  project: PricingProject,
+  projects: PricingProject[],
+  conversation: ConversationMessage[],
+) {
+  const calculation = calculateSuggestedPrice(project);
+  const historicalSuggestion = calculateHistoricalSuggestion(project, projects);
+
   return {
     message,
     projectContext: project.context,
+    conversation,
     pricingData: {
+      projectName: project.projectName,
+      area: project.nucleus,
       nucleus: project.nucleus,
       service: project.service,
       complexity: project.complexity,
@@ -138,7 +174,11 @@ function buildChatPayload(message: string, project: PricingProject) {
       averageHourValue: project.hourValue,
       desiredProfitMargin: project.desiredProfitMargin,
       taxes: project.taxes,
-      extraCosts: project.extraCosts,
+      costValues: project.costValues,
+      additionalCosts: project.additionalCosts,
+      dynamicCostsTotal: calculateDynamicCosts(project),
+      suggestedPrice: calculation.precoFinal,
+      historicalSuggestion,
     },
   };
 }

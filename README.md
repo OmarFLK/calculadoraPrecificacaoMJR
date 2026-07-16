@@ -9,7 +9,7 @@
 ![Vite](https://img.shields.io/badge/VITE-BUILD-646CFF?style=for-the-badge&logo=vite&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/POSTGRESQL-DATABASE-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
 ![SQLAlchemy](https://img.shields.io/badge/SQLALCHEMY-ORM-BB0000?style=for-the-badge)
-![OpenRouter](https://img.shields.io/badge/OPENROUTER-AI-0F172A?style=for-the-badge)
+![OpenAI](https://img.shields.io/badge/OPENAI-RESPONSES_API-17231E?style=for-the-badge&logo=openai&logoColor=white)
 
 ---
 
@@ -66,7 +66,7 @@ Frontend Chat
     |
 Backend /ai/chat
     |
-OpenRouter API
+OpenAI Responses API
 
 Demanda comercial
     |
@@ -111,10 +111,11 @@ Monday.com GraphQL API
 
 ### Inteligencia Artificial:
 
-- OpenRouter API
+- OpenAI Responses API
 - Endpoint backend `/ai/chat`
 - Chave protegida via `.env`
-- Prompt de sistema para comportamento como Assistente IA da Maua Junior
+- contexto resumido do projeto, custos, calculo atual e mediana historica
+- teto configuravel de tokens de saida e log local de uso
 - fallback amigavel em caso de erro
 
 ---
@@ -184,7 +185,7 @@ preco_final = (valor_com_impostos * multiplicador_complexidade) + custos_extras
 - chat lateral integrado ao backend
 - historico visual da conversa
 - scroll interno para mensagens longas
-- resposta via OpenRouter
+- resposta via OpenAI
 - resposta sanitizada para evitar Markdown/HTML quebrando a interface
 - comportamento orientado ao contexto da Maua Junior
 
@@ -322,11 +323,11 @@ MONDAY_REQUEST_TIMEOUT_SECONDS=10
 MONDAY_BOARD_ID=
 
 OPENAI_API_KEY=
-OPENAI_MODEL=gpt-4.1-mini
-OPENROUTER_API_KEY=
-OPENROUTER_MODEL=openrouter/free
-OPENROUTER_SITE_URL=http://127.0.0.1:5173
-OPENROUTER_APP_TITLE=Maua Jr Pricing AI
+OPENAI_MODEL=gpt-5.6-luna
+OPENAI_RESPONSES_URL=https://api.openai.com/v1/responses
+OPENAI_MAX_OUTPUT_TOKENS=320
+OPENAI_REASONING_EFFORT=none
+OPENAI_REQUEST_TIMEOUT_SECONDS=30
 ```
 
 ---
@@ -380,7 +381,7 @@ O projeto foi estruturado para deploy separado:
 - Frontend: Vercel
 - Backend: Render, Railway ou similar
 - Banco de dados: PostgreSQL gerenciado
-- IA: OpenRouter configurado no ambiente do backend
+- IA: OpenAI configurada no ambiente do backend
 
 No deploy, configure as variaveis de ambiente no painel da plataforma.
 Nunca suba arquivos `.env` reais para o repositorio.
@@ -403,11 +404,11 @@ python -m compileall .
 
 Tambem foram testados:
 
-- carregamento das variaveis OpenRouter
+- carregamento das variaveis OpenAI
 - endpoint `/health`
 - endpoint `/ai/chat`
 - CORS local para portas `5173` e `5174`
-- retorno da IA via OpenRouter
+- contrato do chat OpenAI com transporte HTTP simulado
 
 ---
 
@@ -431,6 +432,6 @@ MVP funcional com:
 - backend Flask estruturado
 - modelagem PostgreSQL pronta
 - migrations e seeds iniciais
-- IA via OpenRouter integrada
+- IA via OpenAI Responses API integrada
 - dashboard e historico funcionais
 - base preparada para evolucao com banco real, Drive e analytics avancado
