@@ -29,6 +29,12 @@ class Config:
         "http://localhost:5174",
         "http://127.0.0.1:5174",
     ]
+    MONDAY_API_KEY = os.getenv("MONDAY_API_KEY", "")
+    MONDAY_API_URL = os.getenv("MONDAY_API_URL", "https://api.monday.com/v2")
+    MONDAY_API_VERSION = os.getenv("MONDAY_API_VERSION", "2026-04")
+    MONDAY_REQUEST_TIMEOUT_SECONDS = float(
+        os.getenv("MONDAY_REQUEST_TIMEOUT_SECONDS", "10")
+    )
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
     OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")
     OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")

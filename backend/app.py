@@ -16,6 +16,7 @@ from models import (
 from routes.ai_routes import ai_bp
 from routes.analytics_routes import analytics_bp
 from routes.auth_routes import auth_bp
+from routes.integration_routes import integration_bp
 from routes.pricing_routes import pricing_bp, simulations_bp
 from routes.project_routes import project_bp
 
@@ -55,6 +56,7 @@ def create_app(config_class: type[Config] = Config) -> Flask:
 
 def register_blueprints(app: Flask) -> None:
     app.register_blueprint(auth_bp, url_prefix="/auth")
+    app.register_blueprint(integration_bp, url_prefix="/integrations")
     app.register_blueprint(project_bp, url_prefix="/projects")
     app.register_blueprint(pricing_bp, url_prefix="/pricing")
     app.register_blueprint(simulations_bp, url_prefix="/simulations")

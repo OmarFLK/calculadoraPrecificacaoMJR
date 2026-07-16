@@ -67,6 +67,12 @@ Frontend Chat
 Backend /ai/chat
     |
 OpenRouter API
+
+Demanda comercial
+    |
+Backend /integrations/monday/boards/:id
+    |
+Monday.com GraphQL API
 ```
 
 ---
@@ -307,6 +313,14 @@ JWT_SECRET_KEY=change-this-jwt-secret
 DATABASE_URL=postgresql+psycopg2://postgres:postgres@localhost:5432/maua_pricing_ai
 FRONTEND_ORIGIN=http://127.0.0.1:5173
 
+MONDAY_API_KEY=
+MONDAY_API_URL=https://api.monday.com/v2
+MONDAY_API_VERSION=2026-04
+MONDAY_REQUEST_TIMEOUT_SECONDS=10
+MONDAY_BOARD_ID=
+
+OPENAI_API_KEY=
+OPENAI_MODEL=gpt-4.1-mini
 OPENROUTER_API_KEY=
 OPENROUTER_MODEL=openrouter/free
 OPENROUTER_SITE_URL=http://127.0.0.1:5173

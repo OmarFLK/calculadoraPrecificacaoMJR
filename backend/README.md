@@ -26,6 +26,8 @@ copy .env.example .env
 
 Edite `DATABASE_URL` no `.env` para apontar para seu PostgreSQL local.
 Para IA real no chat, configure `OPENROUTER_API_KEY`.
+Para consultar demanda comercial, configure `MONDAY_API_KEY` com um token que tenha
+acesso de leitura ao board desejado.
 
 ## Banco e migrations
 
@@ -90,12 +92,41 @@ GET /health
 - `POST /ai/analyze`
 - `POST /ai/chat`
 - `GET /analytics/overview`
+- `GET /integrations/monday/boards/<board_id>`
 
 Envie `Authorization: Bearer <token>` nos endpoints protegidos.
+
+## Monday.com
+
+O client usa a API GraphQL oficial, fixa a versão estável configurada em
+`MONDAY_API_VERSION` e aplica timeout em todas as chamadas. Para testar:
+
+```bash
+curl -H "Authorization: Bearer <jwt-do-app>" \
+  http://127.0.0.1:5000/integrations/monday/boards/<board_id>
+```
+
+Variáveis disponíveis:
+
+- `MONDAY_API_KEY`: token pessoal ou de app, mantido apenas no backend
+- `MONDAY_API_URL`: endpoint GraphQL, por padrão `https://api.monday.com/v2`
+- `MONDAY_API_VERSION`: versão fixada da API, por padrão `2026-04`
+- `MONDAY_REQUEST_TIMEOUT_SECONDS`: timeout da chamada HTTP
+- `MONDAY_BOARD_ID`: board local de referência para testes manuais
+
+Referência: [documentação oficial de autenticação](https://developer.monday.com/api-reference/docs/authentication)
+e [consulta de boards](https://developer.monday.com/api-reference/reference/boards).
+
+Com `MONDAY_API_KEY` e `MONDAY_BOARD_ID` preenchidos, rode o smoke test direto:
+
+```bash
+python scripts/check_monday_board.py
+```
 
 ## Limitações atuais
 
 - `/ai/chat` usa OpenRouter quando `OPENROUTER_API_KEY` estiver configurada e retorna fallback amigável em caso de erro.
 - `/ai/analyze` segue como análise mockada e registra log em `ai_analysis_logs`.
 - Google Drive ainda salva apenas `drive_link`.
+- O client do Monday está pronto, mas exige token e board reais para o smoke test externo.
 - Não há roles/admin avançado.
