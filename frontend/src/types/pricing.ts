@@ -24,6 +24,7 @@ export interface AdditionalCost {
 
 export interface PricingProject {
   id: string;
+  isHistorical: boolean;
   nucleus: Nucleus | "";
   service: string;
   projectName: string;
@@ -53,4 +54,12 @@ export interface PricingCalculation {
   valorImpostos: number;
   multiplicador: number;
   precoFinal: number;
+}
+
+export interface HistoricalPricingSuggestion {
+  area: Nucleus | "";
+  sampleCount: number;
+  medianPrice: number | null;
+  minimumPrice: number | null;
+  maximumPrice: number | null;
 }

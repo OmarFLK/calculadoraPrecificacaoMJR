@@ -168,6 +168,8 @@ preco_final = (valor_com_impostos * multiplicador_complexidade) + custos_extras
 - valor historico acumulado
 - listagem expansivel
 - selecao e remocao de itens
+- importacao normalizada de CSV/XLSX com aliases editaveis
+- sugestao por mediana do preco praticado em cada area
 
 ### Dashboard e Analytics:
 
@@ -336,6 +338,13 @@ Criar e migrar estrutura:
 ```bash
 cd backend
 flask --app app db upgrade
+```
+
+Importar histórico de exemplo:
+
+```bash
+cd backend
+python scripts/import_historical_projects.py ../data/historico/exemplo.csv
 ```
 
 Popular dados iniciais:

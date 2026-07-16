@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mauajr.com/schemas/projeto-historico.json",
+  "title": "ProjetoHistorico",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "area", "custos", "precoFinalPraticado", "data"],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "area": { "type": "string", "minLength": 1 },
+    "custos": {
+      "type": "object",
+      "additionalProperties": { "type": "number", "minimum": 0 }
+    },
+    "precoFinalPraticado": { "type": "number", "minimum": 0 },
+    "data": { "type": "string", "format": "date" },
+    "nomeProjeto": { "type": "string" },
+    "servico": { "type": "string" },
+    "complexidade": { "type": "string" },
+    "resultado": { "type": "string" },
+    "observacoes": { "type": "string" }
+  }
+}

@@ -43,6 +43,7 @@ export const TIME_UNITS: TimeUnit[] = ["dias", "semanas", "meses"];
 
 export const createEmptyPricingProject = (id: string): PricingProject => ({
   id,
+  isHistorical: false,
   nucleus: "",
   service: "",
   projectName: "",
@@ -65,9 +66,14 @@ export const createEmptyPricingProject = (id: string): PricingProject => ({
   driveLink: "",
 });
 
+const createHistoricalPricingProject = (id: string): PricingProject => ({
+  ...createEmptyPricingProject(id),
+  isHistorical: true,
+});
+
 export const SAMPLE_HISTORICAL_PROJECTS: PricingProject[] = [
   {
-    ...createEmptyPricingProject("hist-1"),
+    ...createHistoricalPricingProject("hist-1"),
     nucleus: "Tecnologia",
     service: "Desenvolvimento de Sistemas",
     projectName: "Portal interno de indicadores",
@@ -88,7 +94,7 @@ export const SAMPLE_HISTORICAL_PROJECTS: PricingProject[] = [
     driveLink: "https://drive.google.com/",
   },
   {
-    ...createEmptyPricingProject("hist-2"),
+    ...createHistoricalPricingProject("hist-2"),
     nucleus: "Gestão Empresarial",
     service: "Pesquisa de Mercado",
     projectName: "Estudo de expansão regional",
@@ -109,7 +115,7 @@ export const SAMPLE_HISTORICAL_PROJECTS: PricingProject[] = [
     driveLink: "",
   },
   {
-    ...createEmptyPricingProject("hist-3"),
+    ...createHistoricalPricingProject("hist-3"),
     nucleus: "Design",
     service: "Identidade Visual",
     projectName: "Reposicionamento de marca",
@@ -130,7 +136,7 @@ export const SAMPLE_HISTORICAL_PROJECTS: PricingProject[] = [
     driveLink: "https://drive.google.com/",
   },
   {
-    ...createEmptyPricingProject("hist-4"),
+    ...createHistoricalPricingProject("hist-4"),
     nucleus: "Química e Alimentos",
     service: "Rotulagem de Produtos",
     projectName: "Adequação de rótulos alimentícios",
@@ -151,7 +157,7 @@ export const SAMPLE_HISTORICAL_PROJECTS: PricingProject[] = [
     driveLink: "https://drive.google.com/",
   },
   {
-    ...createEmptyPricingProject("hist-5"),
+    ...createHistoricalPricingProject("hist-5"),
     nucleus: "Gestão de Processos",
     service: "Mapeamento de Processos",
     projectName: "Mapeamento operacional comercial",
@@ -172,7 +178,7 @@ export const SAMPLE_HISTORICAL_PROJECTS: PricingProject[] = [
     driveLink: "",
   },
   {
-    ...createEmptyPricingProject("hist-6"),
+    ...createHistoricalPricingProject("hist-6"),
     nucleus: "Tecnologia",
     service: "Implementação de Inteligência Artificial",
     projectName: "Assistente de atendimento interno",
@@ -193,7 +199,7 @@ export const SAMPLE_HISTORICAL_PROJECTS: PricingProject[] = [
     driveLink: "https://drive.google.com/",
   },
   {
-    ...createEmptyPricingProject("hist-7"),
+    ...createHistoricalPricingProject("hist-7"),
     nucleus: "Gestão Empresarial",
     service: "Plano de Negócio",
     projectName: "Plano para nova unidade",
@@ -214,7 +220,7 @@ export const SAMPLE_HISTORICAL_PROJECTS: PricingProject[] = [
     driveLink: "",
   },
   {
-    ...createEmptyPricingProject("hist-8"),
+    ...createHistoricalPricingProject("hist-8"),
     nucleus: "Gestão de Processos",
     service: "Padronização de Processos",
     projectName: "Padronização de rotinas administrativas",
@@ -235,7 +241,7 @@ export const SAMPLE_HISTORICAL_PROJECTS: PricingProject[] = [
     driveLink: "https://drive.google.com/",
   },
   {
-    ...createEmptyPricingProject("hist-9"),
+    ...createHistoricalPricingProject("hist-9"),
     nucleus: "Design",
     service: "Design de Produtos",
     projectName: "Protótipo de produto físico",
@@ -256,7 +262,7 @@ export const SAMPLE_HISTORICAL_PROJECTS: PricingProject[] = [
     driveLink: "",
   },
   {
-    ...createEmptyPricingProject("hist-10"),
+    ...createHistoricalPricingProject("hist-10"),
     nucleus: "Química e Alimentos",
     service: "Formulação de Alimentos",
     projectName: "Formulação de bebida funcional",

@@ -146,7 +146,7 @@ export default function App() {
           </aside>
         </div>
 
-        <ResultCard project={activeProject} />
+        <ResultCard project={activeProject} projects={projects} />
         <DashboardSummary projects={projects} selectedProject={activeProject} />
         <ProjectList
           projects={projects}

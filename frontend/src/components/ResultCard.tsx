@@ -1,13 +1,19 @@
-import { Calculator, TrendingUp } from "lucide-react";
-import { calculateSuggestedPrice, formatCurrency } from "../logic/pricingCalculations";
+import { Calculator, Database, TrendingUp } from "lucide-react";
+import {
+  calculateHistoricalSuggestion,
+  calculateSuggestedPrice,
+  formatCurrency,
+} from "../logic/pricingCalculations";
 import type { PricingProject } from "../types/pricing";
 
 interface ResultCardProps {
   project: PricingProject | undefined;
+  projects: PricingProject[];
 }
 
-export default function ResultCard({ project }: ResultCardProps) {
+export default function ResultCard({ project, projects }: ResultCardProps) {
   const calculation = calculateSuggestedPrice(project);
+  const historicalSuggestion = calculateHistoricalSuggestion(project, projects);
   const title = project?.projectName || "Linha selecionada";
 
   return (
@@ -25,6 +31,22 @@ export default function ResultCard({ project }: ResultCardProps) {
       <div className="result-price">
         <span>Preço final sugerido</span>
         <strong>{formatCurrency(calculation.precoFinal)}</strong>
+      </div>
+
+      <div className="historical-suggestion">
+        <Database size={18} aria-hidden="true" />
+        <div>
+          <span>Mediana histórica</span>
+          <strong>
+            {historicalSuggestion.medianPrice === null
+              ? "Sem histórico para a área"
+              : formatCurrency(historicalSuggestion.medianPrice)}
+          </strong>
+        </div>
+        <small>
+          {historicalSuggestion.sampleCount} projeto
+          {historicalSuggestion.sampleCount === 1 ? "" : "s"}
+        </small>
       </div>
 
       <dl className="metric-list">

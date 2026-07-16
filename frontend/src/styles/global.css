@@ -899,6 +899,44 @@ p {
   line-height: 1.1;
 }
 
+.historical-suggestion {
+  display: grid;
+  margin: 0 20px 18px;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-block: 1px solid var(--gray-200);
+}
+
+.historical-suggestion > svg {
+  width: 36px;
+  height: 36px;
+  color: var(--accent-indigo);
+  background: #eceefe;
+  border-radius: 6px;
+  padding: 8px;
+}
+
+.historical-suggestion span,
+.historical-suggestion small {
+  display: block;
+  color: var(--gray-500);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.historical-suggestion strong {
+  display: block;
+  margin-top: 2px;
+  color: var(--blue-950);
+  font-size: 1.05rem;
+}
+
+.historical-suggestion small {
+  color: var(--blue-800);
+}
+
 .metric-list {
   display: grid;
   margin: 0 20px;
@@ -1819,6 +1857,14 @@ p {
 
   .metric-list {
     grid-template-columns: 1fr;
+  }
+
+  .historical-suggestion {
+    grid-template-columns: 36px minmax(0, 1fr);
+  }
+
+  .historical-suggestion small {
+    grid-column: 2;
   }
 
   .donut-layout {

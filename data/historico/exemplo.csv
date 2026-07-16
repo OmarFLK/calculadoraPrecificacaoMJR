@@ -1,0 +1,4 @@
+id_projeto,area,nome_projeto,servico,complexidade,custo_transporte,custo_material,custos_adicionais,preco_final,data,resultado,observacoes
+HIST-001,Química e Alimentos,Formulação piloto,Formulação de Alimentos,Alta,"350,00","1850,00","420,00","12600,00",2026-02-12,Concluído,Lote piloto aprovado
+HIST-002,Gestão de Processos,Cronoanálise fabril,Cronoanálise,Média,"480,00","0,00","250,00","9800,00",2026-03-08,Concluído,Coleta em dois turnos
+HIST-003,Tecnologia,Portal operacional,Desenvolvimento de Sistemas,Alta,"120,00","0,00","900,00","28500,00",2026-04-21,Concluído,Integração com ERP

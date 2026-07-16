@@ -86,6 +86,7 @@ GET /health
 - `PUT /projects/<id>`
 - `DELETE /projects/<id>`
 - `POST /pricing/calculate`
+- `GET /pricing/suggestions?area=<area>`
 - `POST /simulations`
 - `GET /simulations`
 - `GET /simulations/<id>`
@@ -122,6 +123,22 @@ Com `MONDAY_API_KEY` e `MONDAY_BOARD_ID` preenchidos, rode o smoke test direto:
 ```bash
 python scripts/check_monday_board.py
 ```
+
+## Importação histórica
+
+Arquivos CSV ou XLSX podem ser colocados em `data/historico/`. Dados reais nessa
+pasta são ignorados pelo Git; apenas `exemplo.csv`, `schema.json` e o mapa editável
+`aliases.json` são versionados.
+
+Depois de aplicar as migrations e o seed, importe com:
+
+```bash
+python scripts/import_historical_projects.py ../data/historico/seu-arquivo.xlsx
+```
+
+O comando informa quantas linhas foram criadas, atualizadas ou ignoradas e o motivo
+de cada rejeição. O campo externo `id` torna reimportações idempotentes. A sugestão
+de preço usa a mediana de `charged_value` por área.
 
 ## Limitações atuais
 

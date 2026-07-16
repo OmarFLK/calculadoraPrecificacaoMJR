@@ -1,0 +1,23 @@
+{
+  "id": ["id", "id_projeto", "codigo", "código"],
+  "area": ["area", "área", "nucleo", "núcleo"],
+  "precoFinalPraticado": [
+    "preco_final_praticado",
+    "preço_final_praticado",
+    "preco_final",
+    "valor_cobrado"
+  ],
+  "data": ["data", "data_projeto", "data_fechamento"],
+  "nomeProjeto": ["nome_projeto", "projeto", "nome"],
+  "servico": ["servico", "serviço"],
+  "complexidade": ["complexidade"],
+  "resultado": ["resultado", "status", "resultado_projeto"],
+  "observacoes": ["observacoes", "observações", "notas"],
+  "custos": {
+    "transport_cost": ["custo_transporte", "transporte"],
+    "additional_costs": ["custos_adicionais", "custos_extras"],
+    "material_cost": ["custo_material", "material"],
+    "material_transport_cost": ["transporte_material"],
+    "team_stage_transport_cost": ["transporte_equipe", "transporte_etapa"]
+  }
+}

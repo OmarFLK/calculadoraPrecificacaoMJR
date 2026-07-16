@@ -9,13 +9,18 @@ class HistoricalProject(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):
 
     created_by = db.Column(GUID(), db.ForeignKey("users.id"), nullable=False, index=True)
     nucleus_id = db.Column(GUID(), db.ForeignKey("nuclei.id"), nullable=False, index=True)
-    service_id = db.Column(GUID(), db.ForeignKey("services.id"), nullable=False, index=True)
-    complexity_id = db.Column(GUID(), db.ForeignKey("complexity_levels.id"), nullable=False, index=True)
+    service_id = db.Column(GUID(), db.ForeignKey("services.id"), index=True)
+    complexity_id = db.Column(GUID(), db.ForeignKey("complexity_levels.id"), index=True)
 
     project_name = db.Column(db.String(180), nullable=False)
+    source_id = db.Column(db.String(180))
+    source_file = db.Column(db.String(255))
+    project_date = db.Column(db.Date)
     client_name = db.Column(db.String(180))
     context = db.Column(db.Text)
     observations = db.Column(db.Text)
+    result = db.Column(db.String(120))
+    costs_json = db.Column(db.JSON, nullable=False, default=dict)
 
     charged_value = db.Column(db.Numeric(12, 2))
     reference_ticket = db.Column(db.Numeric(12, 2))
@@ -51,6 +56,12 @@ class HistoricalProject(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):
         db.CheckConstraint("weekly_hours_average IS NULL OR weekly_hours_average >= 0", name="ck_historical_projects_weekly_hours_non_negative"),
         db.Index("ix_historical_projects_charged_value", "charged_value"),
         db.Index("ix_historical_projects_created_at", "created_at"),
+        db.Index("ix_historical_projects_project_date", "project_date"),
+        db.UniqueConstraint(
+            "created_by",
+            "source_id",
+            name="uq_historical_projects_creator_source_id",
+        ),
     )
 
     def to_dict(self) -> dict:
@@ -58,12 +69,17 @@ class HistoricalProject(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):
             **serialize_base(self),
             "created_by": str(self.created_by),
             "nucleus_id": str(self.nucleus_id),
-            "service_id": str(self.service_id),
-            "complexity_id": str(self.complexity_id),
+            "service_id": str(self.service_id) if self.service_id else None,
+            "complexity_id": str(self.complexity_id) if self.complexity_id else None,
             "project_name": self.project_name,
+            "source_id": self.source_id,
+            "source_file": self.source_file,
+            "project_date": self.project_date.isoformat() if self.project_date else None,
             "client_name": self.client_name,
             "context": self.context,
             "observations": self.observations,
+            "result": self.result,
+            "costs": self.costs_json,
             "charged_value": decimal_to_float(self.charged_value),
             "reference_ticket": decimal_to_float(self.reference_ticket),
             "average_hour_value": decimal_to_float(self.average_hour_value),
