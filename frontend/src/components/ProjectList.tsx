@@ -33,7 +33,6 @@ export default function ProjectList({
           <div>
             <p className="section-kicker">Histórico</p>
             <h2 id="project-list-title">Projetos e simulações</h2>
-            <p>Abra quando quiser consultar ou trocar o projeto em edição.</p>
           </div>
         </div>
 
@@ -80,10 +79,10 @@ export default function ProjectList({
               </div>
             </div>
             <div className="project-actions">
-              <button className="secondary-icon-button" type="button" onClick={() => onSelectProject(project.id)}>
+              <button className="secondary-icon-button" type="button" title="Editar projeto" aria-label={`Editar ${project.projectName || "projeto"}`} onClick={() => onSelectProject(project.id)}>
                 <Edit3 size={16} aria-hidden="true" />
               </button>
-              <button className="danger-icon-button" type="button" onClick={() => onRemoveProject(project.id)}>
+              <button className="danger-icon-button" type="button" title="Remover projeto" aria-label={`Remover ${project.projectName || "projeto"}`} onClick={() => onRemoveProject(project.id)}>
                 <Trash2 size={16} aria-hidden="true" />
               </button>
             </div>

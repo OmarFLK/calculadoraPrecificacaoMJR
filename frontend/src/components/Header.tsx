@@ -7,7 +7,7 @@ interface HeaderProps {
 
 export default function Header({ onLogout }: HeaderProps) {
   return (
-    <header className="app-header" style={{ backgroundImage: `linear-gradient(90deg, rgba(6, 27, 70, 0.9), rgba(7, 88, 201, 0.62)), url(${headerImage})` }}>
+    <header className="app-header" style={{ backgroundImage: `url(${headerImage})` }}>
       <div className="header-content">
         <img className="brand-mark" src="/favicon.svg" alt="Mauá Jr" />
         <div>

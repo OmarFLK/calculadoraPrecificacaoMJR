@@ -51,7 +51,6 @@ export default function ChartsPreview({ projects }: ChartsPreviewProps) {
         <div>
           <p className="section-kicker">Analytics</p>
           <h2 id="charts-title">Dashboard Analítico</h2>
-          <p>Visualização mockada da base histórica para apoiar as decisões de preço.</p>
         </div>
       </div>
 
@@ -245,7 +244,7 @@ interface DonutSegment {
   value: number;
 }
 
-const DONUT_COLORS = ["#0758c9", "#12a8c9", "#0a3d8f", "#7aa7ff", "#16724a", "#b42318"];
+const DONUT_COLORS = ["#16946b", "#ef6c57", "#5965d8", "#e1b63f", "#38a6a0", "#c43f5d"];
 
 function buildBarRows(projects: PricingProject[], filters: ChartFilters) {
   if (filters.analysisType === "Projetos por núcleo") {
@@ -334,9 +333,9 @@ function buildDonutSegments(rows: ChartRow[]) {
 
   if (rows.length === 1 && rows[0].value === 0) {
     return [{
-      color: "#d8e2ef",
+      color: "#dce3de",
       label: rows[0].label,
-      slice: "#d8e2ef 0% 100%",
+      slice: "#dce3de 0% 100%",
       value: 0,
     }];
   }

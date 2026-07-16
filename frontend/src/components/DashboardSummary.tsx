@@ -28,18 +28,28 @@ export default function DashboardSummary({ projects, selectedProject }: Dashboar
       </div>
 
       <div className="dashboard-grid">
-        <SummaryCard icon={<Coins size={20} />} label="Preço final sugerido" value={formatCurrency(calculation.precoFinal)} />
-        <SummaryCard icon={<BriefcaseBusiness size={20} />} label="Valor histórico total" value={formatCurrency(totalCharged)} />
-        <SummaryCard icon={<Clock size={20} />} label="Horas mapeadas" value={`${totalHours.toLocaleString("pt-BR")} h`} />
-        <SummaryCard icon={<Percent size={20} />} label="Margem média" value={`${averageMargin.toFixed(1)}%`} />
+        <SummaryCard tone="emerald" icon={<Coins size={20} />} label="Preço final sugerido" value={formatCurrency(calculation.precoFinal)} />
+        <SummaryCard tone="coral" icon={<BriefcaseBusiness size={20} />} label="Valor histórico total" value={formatCurrency(totalCharged)} />
+        <SummaryCard tone="indigo" icon={<Clock size={20} />} label="Horas mapeadas" value={`${totalHours.toLocaleString("pt-BR")} h`} />
+        <SummaryCard tone="gold" icon={<Percent size={20} />} label="Margem média" value={`${averageMargin.toFixed(1)}%`} />
       </div>
     </section>
   );
 }
 
-function SummaryCard({ icon, label, value }: { icon: ReactNode; label: string; value: string }) {
+function SummaryCard({
+  icon,
+  label,
+  tone,
+  value,
+}: {
+  icon: ReactNode;
+  label: string;
+  tone: "coral" | "emerald" | "gold" | "indigo";
+  value: string;
+}) {
   return (
-    <article className="summary-card">
+    <article className={`summary-card ${tone}`}>
       <div className="summary-icon">{icon}</div>
       <span>{label}</span>
       <strong>{value}</strong>

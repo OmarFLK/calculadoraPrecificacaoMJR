@@ -1,4 +1,5 @@
-import { CirclePlus, Trash2 } from "lucide-react";
+import { ChevronDown, CirclePlus, Trash2 } from "lucide-react";
+import { useState } from "react";
 import { getCostFieldsForArea } from "../data/costFields";
 import type {
   AdditionalCost,
@@ -21,6 +22,7 @@ export default function DynamicCostFields({
   onChangeValue,
   onChangeAdditionalCosts,
 }: DynamicCostFieldsProps) {
+  const [isExpanded, setIsExpanded] = useState(true);
   const fields = getCostFieldsForArea(area);
 
   const addCostLine = () => {
@@ -42,14 +44,21 @@ export default function DynamicCostFields({
 
   return (
     <section className="dynamic-cost-section" aria-labelledby="dynamic-cost-title">
-      <div className="dynamic-cost-heading">
+      <button
+        className="dynamic-cost-heading"
+        type="button"
+        aria-controls="dynamic-cost-fields"
+        aria-expanded={isExpanded}
+        onClick={() => setIsExpanded((currentValue) => !currentValue)}
+      >
         <div>
           <p className="section-kicker">Composição de custo</p>
           <h3 id="dynamic-cost-title">Custos do projeto</h3>
         </div>
-      </div>
+        <ChevronDown size={19} aria-hidden="true" />
+      </button>
 
-      <div className="dynamic-cost-grid" key={area || "sem-area"}>
+      {isExpanded ? <div className="dynamic-cost-grid" id="dynamic-cost-fields" key={area || "sem-area"}>
         {fields.map((field) =>
           field.type === "free-list" ? (
             <AdditionalCostsEditor
@@ -85,7 +94,7 @@ export default function DynamicCostFields({
             </label>
           ),
         )}
-      </div>
+      </div> : null}
     </section>
   );
 }

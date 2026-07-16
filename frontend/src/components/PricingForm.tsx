@@ -84,7 +84,6 @@ export default function PricingForm({
         <div>
           <p className="section-kicker">Cadastro e simulação</p>
           <h2 id="pricing-form-title">Precificação do projeto</h2>
-          <p>Preencha os dados principais em formato de formulário, sem planilha espremida.</p>
         </div>
         <div className="toolbar-actions">
           <button className="secondary-button" type="button" onClick={onAddProject}>
