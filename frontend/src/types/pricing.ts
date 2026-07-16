@@ -25,6 +25,7 @@ export interface AdditionalCost {
 export interface PricingProject {
   id: string;
   isHistorical: boolean;
+  savedAt?: string;
   nucleus: Nucleus | "";
   service: string;
   projectName: string;

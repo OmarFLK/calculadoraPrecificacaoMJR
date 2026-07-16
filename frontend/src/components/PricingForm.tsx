@@ -96,7 +96,7 @@ export default function PricingForm({
           </button>
           <button className="primary-button" type="button" onClick={onSave}>
             <Save size={16} aria-hidden="true" />
-            Simular salvar
+            Salvar negociação
           </button>
         </div>
       </div>

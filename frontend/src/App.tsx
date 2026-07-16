@@ -13,17 +13,42 @@ import { createEmptyPricingProject, SAMPLE_HISTORICAL_PROJECTS } from "./data/se
 import type { PricingProject } from "./types/pricing";
 
 const createProjectId = () => crypto.randomUUID();
+const PROJECT_STORAGE_KEY = "maua-pricing-projects-v2";
+
+const loadStoredProjects = (): PricingProject[] => {
+  try {
+    const storedProjects = window.localStorage.getItem(PROJECT_STORAGE_KEY);
+    if (!storedProjects) {
+      return SAMPLE_HISTORICAL_PROJECTS;
+    }
+
+    const parsedProjects = JSON.parse(storedProjects) as unknown;
+    if (
+      Array.isArray(parsedProjects) &&
+      parsedProjects.length > 0 &&
+      parsedProjects.every((project) => typeof project === "object" && project !== null && "id" in project)
+    ) {
+      return parsedProjects as PricingProject[];
+    }
+  } catch {
+    window.localStorage.removeItem(PROJECT_STORAGE_KEY);
+  }
+
+  return SAMPLE_HISTORICAL_PROJECTS;
+};
 
 export default function App() {
   const workbenchRef = useRef<HTMLDivElement | null>(null);
   const pricingFormRef = useRef<HTMLDivElement | null>(null);
+  const saveMessageTimeoutRef = useRef<number | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(
     () => window.sessionStorage.getItem("maua-pricing-authenticated") === "true",
   );
-  const [projects, setProjects] = useState<PricingProject[]>(SAMPLE_HISTORICAL_PROJECTS);
-  const [selectedProjectId, setSelectedProjectId] = useState(SAMPLE_HISTORICAL_PROJECTS[0].id);
+  const [projects, setProjects] = useState<PricingProject[]>(loadStoredProjects);
+  const [selectedProjectId, setSelectedProjectId] = useState(() => projects[0].id);
   const [activeContextProjectId, setActiveContextProjectId] = useState<string | null>(null);
   const [saveMessage, setSaveMessage] = useState("");
+  const [historyOpenRequest, setHistoryOpenRequest] = useState("");
 
   const selectedProject = useMemo(
     () => projects.find((project) => project.id === selectedProjectId) ?? projects[0],
@@ -35,6 +60,16 @@ export default function App() {
     () => projects.find((project) => project.id === activeContextProjectId),
     [projects, activeContextProjectId],
   );
+
+  useEffect(() => {
+    window.localStorage.setItem(PROJECT_STORAGE_KEY, JSON.stringify(projects));
+  }, [projects]);
+
+  useEffect(() => () => {
+    if (saveMessageTimeoutRef.current !== null) {
+      window.clearTimeout(saveMessageTimeoutRef.current);
+    }
+  }, []);
 
   useEffect(() => {
     const pricingFormElement = pricingFormRef.current;
@@ -90,7 +125,7 @@ export default function App() {
   const updateProject = (projectId: string, changes: Partial<PricingProject>) => {
     setProjects((currentProjects) =>
       currentProjects.map((project) =>
-        project.id === projectId ? { ...project, ...changes } : project,
+        project.id === projectId ? { ...project, ...changes, isHistorical: false } : project,
       ),
     );
   };
@@ -103,9 +138,21 @@ export default function App() {
     setActiveContextProjectId(null);
   };
 
-  const simulateSave = () => {
-    setSaveMessage("Dados simulados salvos com sucesso. Integrações reais entram em uma etapa futura.");
-    window.setTimeout(() => setSaveMessage(""), 3500);
+  const saveProject = () => {
+    const savedAt = new Date().toISOString();
+
+    setProjects((currentProjects) =>
+      currentProjects.map((project) =>
+        project.id === activeProject.id ? { ...project, isHistorical: true, savedAt } : project,
+      ),
+    );
+    setHistoryOpenRequest(savedAt);
+    setSaveMessage("Negociação salva no histórico. O resumo em PDF já está disponível.");
+
+    if (saveMessageTimeoutRef.current !== null) {
+      window.clearTimeout(saveMessageTimeoutRef.current);
+    }
+    saveMessageTimeoutRef.current = window.setTimeout(() => setSaveMessage(""), 4200);
   };
 
   const login = () => {
@@ -136,7 +183,7 @@ export default function App() {
               onClearProjects={clearProjects}
               onOpenContext={setActiveContextProjectId}
               onRemoveProject={removeProjectRow}
-              onSave={simulateSave}
+              onSave={saveProject}
               onUpdateProject={updateProject}
             />
           </div>
@@ -149,6 +196,7 @@ export default function App() {
         <ResultCard project={activeProject} projects={projects} />
         <DashboardSummary projects={projects} selectedProject={activeProject} />
         <ProjectList
+          historyOpenRequest={historyOpenRequest}
           projects={projects}
           selectedProjectId={selectedProjectId}
           onRemoveProject={removeProjectRow}
