@@ -6,6 +6,8 @@ import {
   calculateSuggestedPrice,
 } from "../logic/pricingCalculations";
 import type { PricingProject } from "../types/pricing";
+import { calculateServiceMultiplier } from "../data/serviceMultipliers";
+import type { MondayDemandSignal } from "./MondayDemandCard";
 
 const apiBaseUrl = import.meta.env.VITE_API_URL ?? "http://127.0.0.1:5000";
 const initialMessage =
@@ -15,6 +17,7 @@ const friendlyErrorMessage = "Não foi possível consultar a IA no momento. Tent
 interface AiAssistantProps {
   project: PricingProject;
   projects: PricingProject[];
+  mondayDemandSignal?: MondayDemandSignal | null;
 }
 
 interface ChatMessage {
@@ -28,7 +31,7 @@ interface ConversationMessage {
   content: string;
 }
 
-export default function AiAssistant({ project, projects }: AiAssistantProps) {
+export default function AiAssistant({ project, projects, mondayDemandSignal }: AiAssistantProps) {
   const threadRef = useRef<HTMLDivElement | null>(null);
   const [prompt, setPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -68,6 +71,7 @@ export default function AiAssistant({ project, projects }: AiAssistantProps) {
       project,
       projects,
       conversation,
+      mondayDemandSignal,
     );
 
     setMessages((currentMessages) => [
@@ -132,12 +136,13 @@ async function fetchAiAnswer(
   project: PricingProject,
   projects: PricingProject[],
   conversation: ConversationMessage[],
+  mondayDemandSignal?: MondayDemandSignal | null,
 ) {
   try {
     const response = await fetch(`${apiBaseUrl}/ai/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(buildChatPayload(message, project, projects, conversation)),
+      body: JSON.stringify(buildChatPayload(message, project, projects, conversation, mondayDemandSignal)),
     });
     const payload = (await response.json()) as { success?: boolean; answer?: string };
 
@@ -156,9 +161,15 @@ function buildChatPayload(
   project: PricingProject,
   projects: PricingProject[],
   conversation: ConversationMessage[],
+  mondayDemandSignal?: MondayDemandSignal | null,
 ) {
   const calculation = calculateSuggestedPrice(project);
   const historicalSuggestion = calculateHistoricalSuggestion(project, projects);
+  const serviceMultiplier = calculateServiceMultiplier(
+    project.nucleus,
+    project.service,
+    project.serviceMultiplierValues,
+  );
 
   return {
     message,
@@ -178,6 +189,13 @@ function buildChatPayload(
       additionalCosts: project.additionalCosts,
       dynamicCostsTotal: calculateDynamicCosts(project),
       suggestedPrice: calculation.precoFinal,
+      complexityMultiplier: calculation.multiplicadorComplexidade,
+      serviceMultiplier: calculation.multiplicadorServico,
+      combinedMultiplier: calculation.multiplicador,
+      serviceVariableSelections: serviceMultiplier.selections,
+      serviceVariablesComplete: serviceMultiplier.answeredCount === serviceMultiplier.totalQuestions,
+      serviceVariablesNeedReview: serviceMultiplier.reviewRequired,
+      mondayDemandSignal,
       historicalSuggestion,
     },
   };

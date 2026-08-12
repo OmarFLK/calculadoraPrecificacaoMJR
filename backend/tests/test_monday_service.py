@@ -5,6 +5,7 @@ from services.monday_service import (
     MondayClient,
     MondayClientError,
     MondayConfigurationError,
+    build_demand_signal,
 )
 
 
@@ -63,6 +64,51 @@ class MondayClientTest(unittest.TestCase):
 
         with self.assertRaisesRegex(MondayClientError, "Not Authenticated"):
             client.fetch_board("123")
+
+    def test_build_demand_signal_filters_area_and_active_status(self) -> None:
+        board = {
+            "id": "123",
+            "name": "Pipeline comercial",
+            "columns": [
+                {"id": "status", "title": "Status", "type": "status"},
+                {"id": "area", "title": "Núcleo", "type": "dropdown"},
+            ],
+            "items_page": {
+                "items": [
+                    {
+                        "id": "1",
+                        "name": "Pesquisa A",
+                        "column_values": [
+                            {"id": "status", "text": "Em negociação"},
+                            {"id": "area", "text": "Gestão Empresarial"},
+                        ],
+                    },
+                    {
+                        "id": "2",
+                        "name": "Sistema B",
+                        "column_values": [
+                            {"id": "status", "text": "Concluído"},
+                            {"id": "area", "text": "Tecnologia"},
+                        ],
+                    },
+                ]
+            },
+        }
+
+        signal = build_demand_signal(
+            board,
+            area="Gestão Empresarial",
+            active_statuses=("Em negociação", "Em andamento"),
+            medium_threshold=1,
+            high_threshold=3,
+            medium_adjustment=5,
+            high_adjustment=10,
+        )
+
+        self.assertEqual(1, signal["consideredItems"])
+        self.assertEqual(1, signal["activeItems"])
+        self.assertEqual("media", signal["level"])
+        self.assertEqual(5, signal["adjustmentPercentage"])
 
 
 if __name__ == "__main__":

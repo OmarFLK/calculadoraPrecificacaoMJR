@@ -1,3 +1,4 @@
+import unicodedata
 from typing import Any, Protocol
 
 import requests
@@ -14,7 +15,7 @@ query PricingDemandBoard($boardIds: [ID!]!) {
       title
       type
     }
-    items_page(limit: 100) {
+    items_page(limit: 500) {
       cursor
       items {
         id
@@ -28,6 +29,27 @@ query PricingDemandBoard($boardIds: [ID!]!) {
           text
           value
         }
+      }
+    }
+  }
+}
+"""
+
+MONDAY_NEXT_ITEMS_QUERY = """
+query PricingDemandNextPage($cursor: String!) {
+  next_items_page(limit: 500, cursor: $cursor) {
+    cursor
+    items {
+      id
+      name
+      group {
+        id
+        title
+      }
+      column_values {
+        id
+        text
+        value
       }
     }
   }
@@ -70,7 +92,7 @@ class MondayClient:
         api_key: str,
         *,
         api_url: str = "https://api.monday.com/v2",
-        api_version: str = "2026-04",
+        api_version: str = "2026-07",
         timeout_seconds: float = 10,
         session: HttpSession | None = None,
     ) -> None:
@@ -102,7 +124,22 @@ class MondayClient:
                 f"Monday board {normalized_board_id} was not found or is not accessible"
             )
 
-        return boards[0]
+        board = boards[0]
+        items_page = board.get("items_page") or {}
+        items = list(items_page.get("items") or [])
+        cursor = items_page.get("cursor")
+
+        while cursor:
+            next_payload = self._execute_query(
+                MONDAY_NEXT_ITEMS_QUERY,
+                variables={"cursor": cursor},
+            )
+            next_page = (next_payload.get("data") or {}).get("next_items_page") or {}
+            items.extend(next_page.get("items") or [])
+            cursor = next_page.get("cursor")
+
+        board["items_page"] = {"cursor": None, "items": items}
+        return board
 
     def _execute_query(
         self,
@@ -140,3 +177,99 @@ class MondayClient:
             "API-Version": self.api_version,
             "Content-Type": "application/json",
         }
+
+
+def build_demand_signal(
+    board: dict[str, Any],
+    *,
+    area: str = "",
+    status_column_id: str = "",
+    area_column_id: str = "",
+    active_statuses: tuple[str, ...] = (),
+    medium_threshold: int = 4,
+    high_threshold: int = 8,
+    medium_adjustment: float = 5,
+    high_adjustment: float = 10,
+) -> dict[str, Any]:
+    """Turn board workload into a small, explicit pricing reference signal."""
+
+    columns = board.get("columns") or []
+    status_column_id = status_column_id or find_column_id(
+        columns,
+        ("status", "situacao", "fase", "etapa"),
+    )
+    area_column_id = area_column_id or find_column_id(
+        columns,
+        ("area", "nucleo", "servico"),
+    )
+    normalized_active_statuses = {
+        normalize_text(status)
+        for status in active_statuses
+        if status.strip()
+    }
+    normalized_area = normalize_text(area)
+    items = list((board.get("items_page") or {}).get("items") or [])
+
+    considered_items = []
+    for item in items:
+        values = column_value_map(item)
+        if normalized_area and area_column_id:
+            item_area = normalize_text(values.get(area_column_id, ""))
+            if normalized_area not in item_area and item_area not in normalized_area:
+                continue
+        considered_items.append(item)
+
+    active_items = []
+    for item in considered_items:
+        if not status_column_id or not normalized_active_statuses:
+            active_items.append(item)
+            continue
+        status = normalize_text(column_value_map(item).get(status_column_id, ""))
+        if status in normalized_active_statuses:
+            active_items.append(item)
+
+    active_count = len(active_items)
+    if active_count >= high_threshold:
+        level = "alta"
+        adjustment = high_adjustment
+    elif active_count >= medium_threshold:
+        level = "media"
+        adjustment = medium_adjustment
+    else:
+        level = "baixa"
+        adjustment = 0.0
+
+    return {
+        "boardId": str(board.get("id") or ""),
+        "boardName": str(board.get("name") or ""),
+        "area": area,
+        "level": level,
+        "adjustmentPercentage": adjustment,
+        "activeItems": active_count,
+        "consideredItems": len(considered_items),
+        "totalItems": len(items),
+        "statusColumnDetected": bool(status_column_id),
+        "areaColumnDetected": bool(area_column_id),
+    }
+
+
+def find_column_id(columns: list[dict[str, Any]], candidates: tuple[str, ...]) -> str:
+    normalized_candidates = set(candidates)
+    for column in columns:
+        title = normalize_text(column.get("title", ""))
+        if title in normalized_candidates:
+            return str(column.get("id") or "")
+    return ""
+
+
+def column_value_map(item: dict[str, Any]) -> dict[str, str]:
+    return {
+        str(value.get("id") or ""): str(value.get("text") or "")
+        for value in item.get("column_values") or []
+        if value.get("id")
+    }
+
+
+def normalize_text(value: Any) -> str:
+    decomposed = unicodedata.normalize("NFKD", str(value or ""))
+    return "".join(character for character in decomposed if not unicodedata.combining(character)).casefold().strip()

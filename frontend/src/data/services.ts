@@ -11,6 +11,7 @@ export const NUCLEUS_SERVICES: Record<Nucleus, string[]> = {
   "Gestão Empresarial": [
     "Análise Financeira",
     "Plano de Negócio",
+    "Plano de Marketing",
     "Pesquisa de Mercado",
   ],
   Design: ["Identidade Visual", "Design de Produtos"],
@@ -28,6 +29,8 @@ export const NUCLEUS_SERVICES: Record<Nucleus, string[]> = {
     "Neutralização de Carbono",
     "Rotulagem de Produtos",
     "Estudo de Embalagem",
+    "Análise de Componentes",
+    "Manual BPF",
   ],
 };
 
@@ -62,6 +65,7 @@ export const createEmptyPricingProject = (id: string): PricingProject => ({
   additionalCosts: [],
   complexity: "",
   complexityMultiplier: "",
+  serviceMultiplierValues: {},
   context: "",
   driveLink: "",
 });

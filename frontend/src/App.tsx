@@ -6,6 +6,7 @@ import DashboardSummary from "./components/DashboardSummary";
 import Footer from "./components/Footer";
 import Header from "./components/Header";
 import LoginPage from "./components/LoginPage";
+import MondayDemandCard, { type MondayDemandSignal } from "./components/MondayDemandCard";
 import PricingForm from "./components/PricingForm";
 import ProjectList from "./components/ProjectList";
 import ResultCard from "./components/ResultCard";
@@ -14,6 +15,12 @@ import type { PricingProject } from "./types/pricing";
 
 const createProjectId = () => crypto.randomUUID();
 const PROJECT_STORAGE_KEY = "maua-pricing-projects-v2";
+
+const normalizeProject = (project: PricingProject): PricingProject => ({
+  ...createEmptyPricingProject(project.id),
+  ...project,
+  serviceMultiplierValues: project.serviceMultiplierValues ?? {},
+});
 
 const loadStoredProjects = (): PricingProject[] => {
   try {
@@ -28,7 +35,7 @@ const loadStoredProjects = (): PricingProject[] => {
       parsedProjects.length > 0 &&
       parsedProjects.every((project) => typeof project === "object" && project !== null && "id" in project)
     ) {
-      return parsedProjects as PricingProject[];
+      return (parsedProjects as PricingProject[]).map(normalizeProject);
     }
   } catch {
     window.localStorage.removeItem(PROJECT_STORAGE_KEY);
@@ -49,6 +56,7 @@ export default function App() {
   const [activeContextProjectId, setActiveContextProjectId] = useState<string | null>(null);
   const [saveMessage, setSaveMessage] = useState("");
   const [historyOpenRequest, setHistoryOpenRequest] = useState("");
+  const [mondayDemandSignal, setMondayDemandSignal] = useState<MondayDemandSignal | null>(null);
 
   const selectedProject = useMemo(
     () => projects.find((project) => project.id === selectedProjectId) ?? projects[0],
@@ -189,11 +197,12 @@ export default function App() {
           </div>
 
           <aside className="assistant-column">
-            <AiAssistant project={activeProject} projects={projects} />
+            <AiAssistant project={activeProject} projects={projects} mondayDemandSignal={mondayDemandSignal} />
           </aside>
         </div>
 
-        <ResultCard project={activeProject} projects={projects} />
+        <MondayDemandCard area={activeProject.nucleus} onSignalChange={setMondayDemandSignal} />
+        <ResultCard project={activeProject} projects={projects} mondayDemandSignal={mondayDemandSignal} />
         <DashboardSummary projects={projects} selectedProject={activeProject} />
         <ProjectList
           historyOpenRequest={historyOpenRequest}

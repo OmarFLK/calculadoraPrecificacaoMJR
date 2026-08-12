@@ -111,7 +111,7 @@ Variáveis disponíveis:
 
 - `MONDAY_API_KEY`: token pessoal ou de app, mantido apenas no backend
 - `MONDAY_API_URL`: endpoint GraphQL, por padrão `https://api.monday.com/v2`
-- `MONDAY_API_VERSION`: versão fixada da API, por padrão `2026-04`
+- `MONDAY_API_VERSION`: versão fixada da API, por padrão `2026-07`
 - `MONDAY_REQUEST_TIMEOUT_SECONDS`: timeout da chamada HTTP
 - `MONDAY_BOARD_ID`: board local de referência para testes manuais
 

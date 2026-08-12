@@ -1,5 +1,6 @@
 import { FileText, Plus, RotateCcw, Save, Trash2 } from "lucide-react";
 import DynamicCostFields from "./DynamicCostFields";
+import ServiceMultiplierFields from "./ServiceMultiplierFields";
 import { getUniversalCostValueIds } from "../data/costFields";
 import { COMPLEXITY_MULTIPLIERS, NUCLEUS_SERVICES, TIME_UNITS } from "../data/services";
 import type {
@@ -54,7 +55,7 @@ export default function PricingForm({
       Object.entries(project.costValues).filter(([fieldId]) => universalCostIds.has(fieldId)),
     );
 
-    onUpdateProject(project.id, { nucleus, service: "", costValues });
+    onUpdateProject(project.id, { nucleus, service: "", costValues, serviceMultiplierValues: {} });
   };
 
   const updateCostValue = (fieldId: string, value: CostFieldValue) => {
@@ -115,7 +116,7 @@ export default function PricingForm({
           <SelectField
             label="Serviço"
             value={project.service}
-            onChange={(value) => onUpdateProject(project.id, { service: value })}
+            onChange={(value) => onUpdateProject(project.id, { service: value, serviceMultiplierValues: {} })}
             options={services}
             placeholder={project.nucleus ? "Selecione" : "Selecione o núcleo"}
           />
@@ -126,6 +127,18 @@ export default function PricingForm({
           value={project.projectName}
           onChange={(value) => onUpdateProject(project.id, { projectName: value })}
           placeholder="Ex: Sistema interno de indicadores"
+        />
+
+        <ServiceMultiplierFields
+          nucleus={project.nucleus}
+          service={project.service}
+          values={project.serviceMultiplierValues ?? {}}
+          onChange={(questionId, value) => onUpdateProject(project.id, {
+            serviceMultiplierValues: {
+              ...(project.serviceMultiplierValues ?? {}),
+              [questionId]: value,
+            },
+          })}
         />
 
         <div className="form-grid two-columns">

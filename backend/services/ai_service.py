@@ -12,7 +12,11 @@ PRICING_ASSISTANT_SYSTEM_PROMPT = (
     "do Brasil, de forma curta, objetiva e profissional. Analise escopo, custos, "
     "complexidade e riscos, mas nunca invente um preço. Quando mencionar valores, "
     "identifique se vieram do cálculo atual ou da mediana histórica fornecida. Se os "
-    "dados forem insuficientes, diga exatamente o que falta. Use texto puro, sem "
+    "multiplicadores específicos do serviço vieram dos manuais internos anexados. "
+    "Nunca trate o sinal de demanda do monday.com como preço final: ele é apenas uma "
+    "referência percentual explícita, aplicada depois do cálculo principal. Se houver "
+    "variável incompleta ou marcada para revisão, avise antes de recomendar fechamento. "
+    "Se os dados forem insuficientes, diga exatamente o que falta. Use texto puro, sem "
     "Markdown ou HTML."
 )
 
@@ -28,6 +32,11 @@ PRICING_SCALAR_FIELDS = (
     "taxes",
     "dynamicCostsTotal",
     "suggestedPrice",
+    "complexityMultiplier",
+    "serviceMultiplier",
+    "combinedMultiplier",
+    "serviceVariablesComplete",
+    "serviceVariablesNeedReview",
 )
 
 
@@ -189,6 +198,23 @@ def sanitize_pricing_data(raw_pricing_data: Any) -> dict[str, Any]:
     pricing_data["additionalCosts"] = sanitize_additional_costs(
         raw_pricing_data.get("additionalCosts")
     )
+    pricing_data["serviceVariableSelections"] = sanitize_service_variables(
+        raw_pricing_data.get("serviceVariableSelections")
+    )
+    monday_signal = raw_pricing_data.get("mondayDemandSignal")
+    if isinstance(monday_signal, dict):
+        pricing_data["mondayDemandSignal"] = {
+            key: sanitize_context_value(monday_signal[key])
+            for key in (
+                "level",
+                "adjustmentPercentage",
+                "activeItems",
+                "consideredItems",
+                "boardName",
+                "area",
+            )
+            if monday_signal.get(key) not in (None, "")
+        }
     historical_suggestion = raw_pricing_data.get("historicalSuggestion")
     if isinstance(historical_suggestion, dict):
         pricing_data["historicalSuggestion"] = {
@@ -203,6 +229,22 @@ def sanitize_pricing_data(raw_pricing_data: Any) -> dict[str, Any]:
             if historical_suggestion.get(key) not in (None, "")
         }
     return pricing_data
+
+
+def sanitize_service_variables(raw_variables: Any) -> list[dict[str, Any]]:
+    if not isinstance(raw_variables, list):
+        return []
+    variables: list[dict[str, Any]] = []
+    for raw_variable in raw_variables[:12]:
+        if not isinstance(raw_variable, dict):
+            continue
+        variables.append({
+            "variable": bounded_text(raw_variable.get("questionLabel"), 100),
+            "selection": bounded_text(raw_variable.get("optionLabel"), 120),
+            "multiplier": sanitize_context_value(raw_variable.get("multiplier")),
+            "note": bounded_text(raw_variable.get("note"), 160),
+        })
+    return variables
 
 
 def sanitize_cost_values(raw_cost_values: Any) -> dict[str, Any]:

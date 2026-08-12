@@ -19,11 +19,13 @@ def calculate_pricing(payload: dict[str, Any], multiplier: float = 1.0) -> dict[
     margin = get_float(payload, "desired_profit_margin")
     taxes = get_float(payload, "taxes_percentage", get_float(payload, "taxes"))
     extra_costs = get_float(payload, "extra_costs")
+    service_multiplier = get_float(payload, "service_multiplier", 1.0)
 
     base_cost = total_hours * hour_value
     value_with_margin = base_cost * (1 + margin / 100)
     value_with_taxes = value_with_margin * (1 + taxes / 100)
-    final_price = (value_with_taxes * multiplier) + extra_costs
+    combined_multiplier = multiplier * service_multiplier
+    final_price = (value_with_taxes * combined_multiplier) + extra_costs
 
     return {
         "base_cost": round(base_cost, 2),
@@ -34,13 +36,15 @@ def calculate_pricing(payload: dict[str, Any], multiplier: float = 1.0) -> dict[
         "ideal_price": round(final_price, 2),
         "premium_price": round(final_price * 1.1, 2),
         "complexity_multiplier": round(multiplier, 2),
+        "service_multiplier": round(service_multiplier, 4),
+        "combined_multiplier": round(combined_multiplier, 4),
         "breakdown": {
             "hours": total_hours,
             "hour_value": hour_value,
             "desired_profit_margin": margin,
             "taxes_percentage": taxes,
             "extra_costs": extra_costs,
-            "formula": "((hours * hour_value) * margin) * taxes * complexity + extra_costs",
+            "formula": "((hours * hour_value) * margin) * taxes * complexity * service_variables + extra_costs",
         },
     }
 
@@ -90,4 +94,5 @@ def get_pricing_numeric_fields() -> list[str]:
         "extra_costs",
         "consultants_count",
         "weekly_hours_average",
+        "service_multiplier",
     ]

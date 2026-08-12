@@ -147,6 +147,9 @@ Monday.com GraphQL API
 - custos extras
 - complexidade
 - multiplicador automatico
+- variaveis e multiplicadores especificos por servico, extraidos dos manuais internos
+- memoria de calculo auditavel para cada variavel selecionada
+- alerta quando o manual nao define uma faixa com clareza
 - link do Google Drive
 - contexto do projeto em modal
 
@@ -188,6 +191,24 @@ preco_final = (valor_com_impostos * multiplicador_complexidade) + custos_extras
 - resposta via OpenAI
 - resposta sanitizada para evitar Markdown/HTML quebrando a interface
 - comportamento orientado ao contexto da Maua Junior
+- contexto resumido das regras do servico e do sinal de demanda da monday.com
+
+### monday.com:
+
+- leitura paginada de ate 500 itens por pagina do board comercial
+- filtro opcional por nucleo/area e status ativo
+- sinal de demanda baixa, media ou alta com percentuais configuraveis
+- cache no backend para evitar chamadas a cada renderizacao
+- ajuste exibido somente como referencia; o preco principal nao e alterado silenciosamente
+
+Configure no `.env` o token, o board e, se necessario, os IDs das colunas de
+status e area. Quando os IDs nao forem informados, o backend tenta localizar
+colunas com nomes como `Status`, `Situacao`, `Nucleo` e `Area`.
+
+Para uma evolucao multiusuario, use um app privado com OAuth e escopos minimos
+(`boards:read`; acrescente `boards:write` ou `updates:write` somente se a
+calculadora for devolver preco/status ao item). Webhooks sao recomendados para
+sincronizacao em tempo real, evitando polling.
 
 ---
 
@@ -318,9 +339,17 @@ FRONTEND_ORIGIN=http://127.0.0.1:5173
 
 MONDAY_API_KEY=
 MONDAY_API_URL=https://api.monday.com/v2
-MONDAY_API_VERSION=2026-04
+MONDAY_API_VERSION=2026-07
 MONDAY_REQUEST_TIMEOUT_SECONDS=10
 MONDAY_BOARD_ID=
+MONDAY_STATUS_COLUMN_ID=
+MONDAY_AREA_COLUMN_ID=
+MONDAY_ACTIVE_STATUS_LABELS=Novo,Em negociacao,Proposta enviada,Em andamento
+MONDAY_DEMAND_MEDIUM_THRESHOLD=4
+MONDAY_DEMAND_HIGH_THRESHOLD=8
+MONDAY_DEMAND_MEDIUM_ADJUSTMENT=5
+MONDAY_DEMAND_HIGH_ADJUSTMENT=10
+MONDAY_CACHE_TTL_SECONDS=300
 
 OPENAI_API_KEY=
 OPENAI_MODEL=gpt-5.6-luna

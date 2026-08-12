@@ -3,6 +3,7 @@ import type {
   PricingCalculation,
   PricingProject,
 } from "../types/pricing";
+import { calculateServiceMultiplier } from "../data/serviceMultipliers";
 
 const toMoneyNumber = (value: number | "") => (value === "" ? 0 : value);
 
@@ -25,6 +26,8 @@ export const calculateSuggestedPrice = (
       valorMargem: 0,
       valorImpostos: 0,
       multiplicador: 1,
+      multiplicadorComplexidade: 1,
+      multiplicadorServico: 1,
       precoFinal: 0,
     };
   }
@@ -32,7 +35,13 @@ export const calculateSuggestedPrice = (
   const custoBase = toMoneyNumber(project.totalWorkedHours) * toMoneyNumber(project.hourValue);
   const valorMargem = custoBase * (1 + toMoneyNumber(project.desiredProfitMargin) / 100);
   const valorImpostos = valorMargem * (1 + toMoneyNumber(project.taxes) / 100);
-  const multiplicador = project.complexityMultiplier === "" ? 1 : project.complexityMultiplier;
+  const multiplicadorComplexidade = project.complexityMultiplier === "" ? 1 : project.complexityMultiplier;
+  const multiplicadorServico = calculateServiceMultiplier(
+    project.nucleus,
+    project.service,
+    project.serviceMultiplierValues,
+  ).multiplier;
+  const multiplicador = multiplicadorComplexidade * multiplicadorServico;
   const custosDinamicos = calculateDynamicCosts(project);
   const precoFinal = valorImpostos * multiplicador + custosDinamicos;
 
@@ -42,6 +51,8 @@ export const calculateSuggestedPrice = (
     valorMargem,
     valorImpostos,
     multiplicador,
+    multiplicadorComplexidade,
+    multiplicadorServico,
     precoFinal,
   };
 };

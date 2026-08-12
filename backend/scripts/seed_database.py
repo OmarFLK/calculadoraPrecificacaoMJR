@@ -25,6 +25,7 @@ NUCLEI_AND_SERVICES = {
     "Gestão Empresarial": [
         "Análise Financeira",
         "Plano de Negócio",
+        "Plano de Marketing",
         "Pesquisa de Mercado",
     ],
     "Design": ["Identidade Visual", "Design de Produtos"],
@@ -42,6 +43,8 @@ NUCLEI_AND_SERVICES = {
         "Neutralização de Carbono",
         "Rotulagem de Produtos",
         "Estudo de Embalagem",
+        "Análise de Componentes",
+        "Manual BPF",
     ],
 }
 

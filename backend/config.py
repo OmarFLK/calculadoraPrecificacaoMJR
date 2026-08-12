@@ -31,10 +31,34 @@ class Config:
     ]
     MONDAY_API_KEY = os.getenv("MONDAY_API_KEY", "")
     MONDAY_API_URL = os.getenv("MONDAY_API_URL", "https://api.monday.com/v2")
-    MONDAY_API_VERSION = os.getenv("MONDAY_API_VERSION", "2026-04")
+    MONDAY_API_VERSION = os.getenv("MONDAY_API_VERSION", "2026-07")
     MONDAY_REQUEST_TIMEOUT_SECONDS = float(
         os.getenv("MONDAY_REQUEST_TIMEOUT_SECONDS", "10")
     )
+    MONDAY_BOARD_ID = os.getenv("MONDAY_BOARD_ID", "")
+    MONDAY_STATUS_COLUMN_ID = os.getenv("MONDAY_STATUS_COLUMN_ID", "")
+    MONDAY_AREA_COLUMN_ID = os.getenv("MONDAY_AREA_COLUMN_ID", "")
+    MONDAY_ACTIVE_STATUS_LABELS = tuple(
+        label.strip()
+        for label in os.getenv(
+            "MONDAY_ACTIVE_STATUS_LABELS",
+            "Novo,Em negociação,Proposta enviada,Em andamento",
+        ).split(",")
+        if label.strip()
+    )
+    MONDAY_DEMAND_MEDIUM_THRESHOLD = int(
+        os.getenv("MONDAY_DEMAND_MEDIUM_THRESHOLD", "4")
+    )
+    MONDAY_DEMAND_HIGH_THRESHOLD = int(
+        os.getenv("MONDAY_DEMAND_HIGH_THRESHOLD", "8")
+    )
+    MONDAY_DEMAND_MEDIUM_ADJUSTMENT = float(
+        os.getenv("MONDAY_DEMAND_MEDIUM_ADJUSTMENT", "5")
+    )
+    MONDAY_DEMAND_HIGH_ADJUSTMENT = float(
+        os.getenv("MONDAY_DEMAND_HIGH_ADJUSTMENT", "10")
+    )
+    MONDAY_CACHE_TTL_SECONDS = int(os.getenv("MONDAY_CACHE_TTL_SECONDS", "300"))
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
     OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-5.6-luna")
     OPENAI_RESPONSES_URL = os.getenv(

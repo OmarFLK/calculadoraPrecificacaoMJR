@@ -44,6 +44,7 @@ export interface PricingProject {
   additionalCosts: AdditionalCost[];
   complexity: Complexity | "";
   complexityMultiplier: number | "";
+  serviceMultiplierValues: Record<string, string>;
   context: string;
   driveLink: string;
 }
@@ -54,6 +55,8 @@ export interface PricingCalculation {
   valorMargem: number;
   valorImpostos: number;
   multiplicador: number;
+  multiplicadorComplexidade: number;
+  multiplicadorServico: number;
   precoFinal: number;
 }
 
