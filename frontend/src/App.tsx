@@ -1,14 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import AiAssistant from "./components/AiAssistant";
-import ChartsPreview from "./components/ChartsPreview";
 import ContextModal from "./components/ContextModal";
-import DashboardSummary from "./components/DashboardSummary";
 import Footer from "./components/Footer";
 import Header from "./components/Header";
 import LoginPage from "./components/LoginPage";
 import MondayDemandCard, { type MondayDemandSignal } from "./components/MondayDemandCard";
 import PricingForm from "./components/PricingForm";
-import ProjectList from "./components/ProjectList";
 import ResultCard from "./components/ResultCard";
 import { createEmptyPricingProject, SAMPLE_HISTORICAL_PROJECTS } from "./data/services";
 import type { PricingProject } from "./types/pricing";
@@ -45,8 +42,6 @@ const loadStoredProjects = (): PricingProject[] => {
 };
 
 export default function App() {
-  const workbenchRef = useRef<HTMLDivElement | null>(null);
-  const pricingFormRef = useRef<HTMLDivElement | null>(null);
   const saveMessageTimeoutRef = useRef<number | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(
     () => window.sessionStorage.getItem("maua-pricing-authenticated") === "true",
@@ -55,7 +50,6 @@ export default function App() {
   const [selectedProjectId, setSelectedProjectId] = useState(() => projects[0].id);
   const [activeContextProjectId, setActiveContextProjectId] = useState<string | null>(null);
   const [saveMessage, setSaveMessage] = useState("");
-  const [historyOpenRequest, setHistoryOpenRequest] = useState("");
   const [mondayDemandSignal, setMondayDemandSignal] = useState<MondayDemandSignal | null>(null);
 
   const selectedProject = useMemo(
@@ -78,31 +72,6 @@ export default function App() {
       window.clearTimeout(saveMessageTimeoutRef.current);
     }
   }, []);
-
-  useEffect(() => {
-    const pricingFormElement = pricingFormRef.current;
-    const workbenchElement = workbenchRef.current;
-
-    if (!pricingFormElement || !workbenchElement) {
-      return undefined;
-    }
-
-    const syncAssistantHeight = () => {
-      const formHeight = pricingFormElement.getBoundingClientRect().height;
-      workbenchElement.style.setProperty("--assistant-card-height", `${Math.round(formHeight)}px`);
-    };
-
-    syncAssistantHeight();
-
-    const observer = new ResizeObserver(syncAssistantHeight);
-    observer.observe(pricingFormElement);
-    window.addEventListener("resize", syncAssistantHeight);
-
-    return () => {
-      observer.disconnect();
-      window.removeEventListener("resize", syncAssistantHeight);
-    };
-  }, [activeProject, saveMessage]);
 
   const addProjectRow = () => {
     const newProject = createEmptyPricingProject(createProjectId());
@@ -154,8 +123,7 @@ export default function App() {
         project.id === activeProject.id ? { ...project, isHistorical: true, savedAt } : project,
       ),
     );
-    setHistoryOpenRequest(savedAt);
-    setSaveMessage("Negociação salva no histórico. O resumo em PDF já está disponível.");
+    setSaveMessage("Negociação salva neste navegador.");
 
     if (saveMessageTimeoutRef.current !== null) {
       window.clearTimeout(saveMessageTimeoutRef.current);
@@ -182,36 +150,19 @@ export default function App() {
       <Header onLogout={logout} />
 
       <main className="app-shell page-stack">
-        <div className="workbench-grid" ref={workbenchRef}>
-          <div className="pricing-form-anchor" ref={pricingFormRef}>
-            <PricingForm
-              project={activeProject}
-              saveMessage={saveMessage}
-              onAddProject={addProjectRow}
-              onClearProjects={clearProjects}
-              onOpenContext={setActiveContextProjectId}
-              onRemoveProject={removeProjectRow}
-              onSave={saveProject}
-              onUpdateProject={updateProject}
-            />
-          </div>
-
-          <aside className="assistant-column">
-            <AiAssistant project={activeProject} projects={projects} mondayDemandSignal={mondayDemandSignal} />
-          </aside>
-        </div>
-
-        <MondayDemandCard area={activeProject.nucleus} onSignalChange={setMondayDemandSignal} />
-        <ResultCard project={activeProject} projects={projects} mondayDemandSignal={mondayDemandSignal} />
-        <DashboardSummary projects={projects} selectedProject={activeProject} />
-        <ProjectList
-          historyOpenRequest={historyOpenRequest}
-          projects={projects}
-          selectedProjectId={selectedProjectId}
+        <PricingForm
+          project={activeProject}
+          saveMessage={saveMessage}
+          onAddProject={addProjectRow}
+          onClearProjects={clearProjects}
+          onOpenContext={setActiveContextProjectId}
           onRemoveProject={removeProjectRow}
-          onSelectProject={setSelectedProjectId}
+          onSave={saveProject}
+          onUpdateProject={updateProject}
         />
-        <ChartsPreview projects={projects} />
+        <ResultCard project={activeProject} projects={projects} mondayDemandSignal={mondayDemandSignal} />
+        <AiAssistant project={activeProject} projects={projects} mondayDemandSignal={mondayDemandSignal} />
+        <MondayDemandCard area={activeProject.nucleus} onSignalChange={setMondayDemandSignal} />
       </main>
 
       <Footer />

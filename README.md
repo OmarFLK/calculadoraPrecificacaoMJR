@@ -17,13 +17,13 @@
 
 O **Maua Jr Pricing AI** e uma aplicacao web full-stack criada para apoiar a precificacao de projetos internos da Maua Junior.
 
-A plataforma permite cadastrar projetos historicos, simular precos, analisar custos, registrar contexto comercial e conversar com um assistente de IA para apoiar decisoes de escopo, complexidade, riscos e faixa de preco.
+A plataforma permite simular precos, analisar custos, registrar contexto comercial e conversar com um assistente de IA para apoiar decisoes de escopo, complexidade, riscos e faixa de preco.
 
 O sistema foi projetado como um MVP evolutivo, com foco em:
 
 - interface premium e profissional para uso interno
 - calculadora de precificacao baseada em regras claras
-- historico de projetos e simulacoes
+- memoria local das negociacoes e base historica para medianas
 - backend modular em Flask
 - banco PostgreSQL estruturado para analytics
 - preparacao para Google Drive, IA e evolucoes futuras
@@ -164,28 +164,15 @@ valor_com_impostos = valor_com_margem * (1 + impostos / 100)
 preco_final = (valor_com_impostos * multiplicador_complexidade) + custos_extras
 ```
 
-### Historico:
+### Base historica:
 
-- card recolhido para evitar poluicao visual
-- resumo do total de projetos
-- projeto ativo
-- valor historico acumulado
-- listagem expansivel
-- selecao e remocao de itens
-- importacao normalizada de CSV/XLSX com aliases editaveis
+- importacao normalizada de CSV/XLSX com aliases editaveis no backend
 - sugestao por mediana do preco praticado em cada area
-
-### Dashboard e Analytics:
-
-- resumo financeiro
-- cards de indicadores
-- graficos de barras
-- grafico de distribuicao por donut
-- filtros analiticos por nucleo, complexidade, ticket, consultores, prazo e margem
+- sem cards de Historico, Dashboard ou Analytics na interface principal
 
 ### Assistente IA:
 
-- chat lateral integrado ao backend
+- chat integrado ao backend, exibido depois do resultado simulado
 - historico visual da conversa
 - scroll interno para mensagens longas
 - resposta via OpenAI
@@ -204,6 +191,9 @@ preco_final = (valor_com_impostos * multiplicador_complexidade) + custos_extras
 Configure no `.env` o token, o board e, se necessario, os IDs das colunas de
 status e area. Quando os IDs nao forem informados, o backend tenta localizar
 colunas com nomes como `Status`, `Situacao`, `Nucleo` e `Area`.
+
+O passo a passo completo de credenciais, escopos, validacao local e deploy esta em
+[`docs/API_SETUP.md`](docs/API_SETUP.md).
 
 Para uma evolucao multiusuario, use um app privado com OAuth e escopos minimos
 (`boards:read`; acrescente `boards:write` ou `updates:write` somente se a
@@ -462,5 +452,5 @@ MVP funcional com:
 - modelagem PostgreSQL pronta
 - migrations e seeds iniciais
 - IA via OpenAI Responses API integrada
-- dashboard e historico funcionais
+- fluxo principal na ordem cadastro, resultado, OpenAI e monday.com
 - base preparada para evolucao com banco real, Drive e analytics avancado

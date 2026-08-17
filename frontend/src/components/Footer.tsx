@@ -1,13 +1,17 @@
-import { ChevronRight, Instagram, Linkedin, Mail, MapPin, Phone } from "lucide-react";
-import headerImage from "../assets/maua-header.jpg";
+import { ChevronRight, Instagram, Linkedin, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
+import logoImage from "../assets/maua-logo-white.png";
 
-const pages = ["Home", "Quem somos", "Contato"];
+const pages = [
+  { label: "Home", href: "https://mauajr.com.br/" },
+  { label: "Quem somos", href: "https://mauajr.com.br/Quem-somos.html" },
+  { label: "Contato", href: "https://mauajr.com.br/Contato.html" },
+];
 const services = [
-  "Tecnologia",
-  "Gestão Empresarial",
-  "Design",
-  "Gestão de Processos",
-  "Química/Alimentos",
+  { label: "Tecnologia", href: "https://mauajr.com.br/Serviços-tecnologia.html" },
+  { label: "Gestão Empresarial", href: "https://mauajr.com.br/Serviços-administração.html" },
+  { label: "Design", href: "https://mauajr.com.br/servicos-design.html" },
+  { label: "Gestão de Processos", href: "https://mauajr.com.br/servicos-producao.html" },
+  { label: "Química/Alimentos", href: "https://mauajr.com.br/Serviços-quimica.html" },
 ];
 
 export default function Footer() {
@@ -15,16 +19,24 @@ export default function Footer() {
     <footer className="app-footer">
       <div className="footer-content">
         <section className="footer-brand" aria-label="Mauá Jr">
-          <div className="footer-logo">
-            <img src={headerImage} alt="Mauá Jr" />
-          </div>
+          <a className="footer-logo" href="https://mauajr.com.br/" target="_blank" rel="noreferrer">
+            <img src={logoImage} alt="Mauá Jr — Consultoria desde 1990" />
+          </a>
           <p>
             A Mauá Júnior é uma entidade sem fins lucrativos voltada para o
-            desenvolvimento profissional de alunos do Instituto Mauá de Tecnologia.
+            desenvolvimento profissional de alunos do Instituto Mauá de Tecnologia
+            através da realização de projetos personalizados para clientes.
           </p>
           <div className="footer-socials" aria-label="Redes sociais">
-            <Instagram size={20} aria-hidden="true" />
-            <Linkedin size={20} aria-hidden="true" />
+            <a href="https://www.instagram.com/mauajr/" target="_blank" rel="noreferrer" aria-label="Instagram da Mauá Jr">
+              <Instagram size={21} aria-hidden="true" />
+            </a>
+            <a href="https://wa.me/5511913474531" target="_blank" rel="noreferrer" aria-label="WhatsApp da Mauá Jr">
+              <MessageCircle size={21} aria-hidden="true" />
+            </a>
+            <a href="https://www.linkedin.com/company/mauajr" target="_blank" rel="noreferrer" aria-label="LinkedIn da Mauá Jr">
+              <Linkedin size={21} aria-hidden="true" />
+            </a>
           </div>
         </section>
 
@@ -36,15 +48,21 @@ export default function Footer() {
           <ul className="footer-contact-list">
             <li>
               <Phone size={18} aria-hidden="true" />
-              <span>+55 11 97625-7520</span>
+              <a href="tel:+5511913474531">+55 11 91347-4531</a>
             </li>
             <li>
               <Mail size={18} aria-hidden="true" />
-              <span>dpcomercial@mauajr.com</span>
+              <a href="mailto:dpcomercial@mauajr.com">dpcomercial@mauajr.com</a>
             </li>
             <li>
               <MapPin size={18} aria-hidden="true" />
-              <span>Praça Mauá, 1 - Mauá, São Caetano do Sul - SP, 09580-900</span>
+              <a
+                href="https://www.google.com/maps/search/?api=1&query=Praça+Mauá,+1,+São+Caetano+do+Sul,+SP,+09580-900"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Praça Mauá, 1 - Mauá, São Caetano do Sul - SP, 09580-900
+              </a>
             </li>
           </ul>
         </section>
@@ -59,15 +77,20 @@ export default function Footer() {
   );
 }
 
-function FooterColumn({ title, items }: { title: string; items: string[] }) {
+interface FooterLink {
+  label: string;
+  href: string;
+}
+
+function FooterColumn({ title, items }: { title: string; items: FooterLink[] }) {
   return (
     <section className="footer-column">
       <h2>{title}</h2>
       <ul>
         {items.map((item) => (
-          <li key={item}>
+          <li key={item.href}>
             <ChevronRight size={18} aria-hidden="true" />
-            <span>{item}</span>
+            <a href={item.href} target="_blank" rel="noreferrer">{item.label}</a>
           </li>
         ))}
       </ul>
