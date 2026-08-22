@@ -3,7 +3,7 @@ from flask import Blueprint, jsonify, request
 from extensions import db
 from models.pricing_simulation import PricingSimulation
 from models.user import User
-from services.catalog_service import resolve_pricing_relations
+from services.catalog_service import resolve_nucleus, resolve_pricing_relations, resolve_service
 from services.historical_pricing_service import get_historical_suggestion
 from services.pricing_service import build_pricing_simulation, calculate_pricing
 from utils.auth import login_required
@@ -17,6 +17,11 @@ simulations_bp = Blueprint("simulations", __name__)
 @login_required
 def calculate(current_user: User):
     payload = request.get_json(silent=True) or {}
+    if payload.get("nucleus") == "Arquitetura e Civil":
+        nucleus = resolve_nucleus(payload)
+        resolve_service(payload, nucleus)
+        return jsonify(calculate_pricing(payload))
+
     relations = resolve_pricing_relations(payload)
     return jsonify(calculate_pricing(payload, relations["complexity_multiplier"]))
 

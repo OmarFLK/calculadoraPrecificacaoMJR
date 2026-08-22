@@ -5,6 +5,7 @@ import {
   formatCurrency,
 } from "../logic/pricingCalculations";
 import { calculateServiceMultiplier } from "../data/serviceMultipliers";
+import { calculateArchitecturePricing } from "../logic/architecturePricing";
 import type { PricingProject } from "../types/pricing";
 import type { MondayDemandSignal } from "./MondayDemandCard";
 
@@ -16,6 +17,7 @@ interface ResultCardProps {
 
 export default function ResultCard({ project, projects, mondayDemandSignal }: ResultCardProps) {
   const calculation = calculateSuggestedPrice(project);
+  const architectureCalculation = calculateArchitecturePricing(project);
   const historicalSuggestion = calculateHistoricalSuggestion(project, projects);
   const serviceSummary = calculateServiceMultiplier(
     project?.nucleus ?? "",
@@ -37,7 +39,7 @@ export default function ResultCard({ project, projects, mondayDemandSignal }: Re
       </div>
 
       <div className="result-price">
-        <span>Preço final sugerido</span>
+        <span>{architectureCalculation ? "Valor bruto sugerido" : "Preço final sugerido"}</span>
         <strong>{formatCurrency(calculation.precoFinal)}</strong>
       </div>
 
@@ -68,17 +70,41 @@ export default function ResultCard({ project, projects, mondayDemandSignal }: Re
         </div>
       ) : null}
 
-      <dl className="metric-list">
-        <Metric label="Custo base" value={formatCurrency(calculation.custoBase)} />
-        <Metric label="Valor com margem" value={formatCurrency(calculation.valorMargem)} />
-        <Metric label="Valor com impostos" value={formatCurrency(calculation.valorImpostos)} />
-        <Metric label="Custos do projeto" value={formatCurrency(calculation.custosDinamicos)} />
-        <Metric label="Complexidade" value={`× ${calculation.multiplicadorComplexidade.toFixed(2)}`} />
-        <Metric label="Variáveis do serviço" value={`× ${calculation.multiplicadorServico.toFixed(2)}`} />
-        <Metric label="Multiplicador combinado" value={`× ${calculation.multiplicador.toFixed(2)}`} />
-      </dl>
+      {architectureCalculation ? (
+        <>
+          <dl className="metric-list">
+            <Metric label="Folhas / plantas" value={String(architectureCalculation.sheetCount)} />
+            <Metric label="Área total" value={`${architectureCalculation.totalSquareMeters.toLocaleString("pt-BR")} m²`} />
+            <Metric label="Valor por m²" value={formatCurrency(architectureCalculation.squareMeterRate)} />
+            <Metric label="Valor da área" value={formatCurrency(architectureCalculation.areaValue)} />
+            <Metric label="Mão de obra" value={formatCurrency(architectureCalculation.consultantLaborCost)} />
+            <Metric label="Custos indiretos" value={formatCurrency(architectureCalculation.indirectCosts)} />
+            <Metric label="Custo" value={formatCurrency(architectureCalculation.totalCost)} />
+            <Metric label="Imposto" value={formatCurrency(architectureCalculation.taxAmount)} />
+            <Metric label="Valor líquido" value={formatCurrency(architectureCalculation.netValue)} />
+          </dl>
+          <details className="calculation-details">
+            <summary>Ver memória de cálculo da planilha</summary>
+            <ul>
+              <li><span>Custo</span><strong>indiretos + (hora × consultores × horas)</strong></li>
+              <li><span>Valor bruto</span><strong>(m² × valor/m²) + custo</strong></li>
+              <li><span>Valor líquido</span><strong>valor bruto − imposto</strong></li>
+            </ul>
+          </details>
+        </>
+      ) : (
+        <dl className="metric-list">
+          <Metric label="Custo base" value={formatCurrency(calculation.custoBase)} />
+          <Metric label="Valor com margem" value={formatCurrency(calculation.valorMargem)} />
+          <Metric label="Valor com impostos" value={formatCurrency(calculation.valorImpostos)} />
+          <Metric label="Custos do projeto" value={formatCurrency(calculation.custosDinamicos)} />
+          <Metric label="Complexidade" value={`× ${calculation.multiplicadorComplexidade.toFixed(2)}`} />
+          <Metric label="Variáveis do serviço" value={`× ${calculation.multiplicadorServico.toFixed(2)}`} />
+          <Metric label="Multiplicador combinado" value={`× ${calculation.multiplicador.toFixed(2)}`} />
+        </dl>
+      )}
 
-      {serviceSummary.selections.length ? (
+      {!architectureCalculation && serviceSummary.selections.length ? (
         <details className="calculation-details">
           <summary>Ver memória de cálculo das variáveis</summary>
           <ul>
@@ -94,7 +120,11 @@ export default function ResultCard({ project, projects, mondayDemandSignal }: Re
 
       <div className="result-note">
         <TrendingUp size={16} aria-hidden="true" />
-        <span>Baseado em horas, margem, impostos, complexidade, regras do serviço e custos configurados.</span>
+        <span>
+          {architectureCalculation
+            ? "Cálculo reproduzido da planilha do Núcleo Civil e Arquitetura."
+            : "Baseado em horas, margem, impostos, complexidade, regras do serviço e custos configurados."}
+        </span>
       </div>
     </section>
   );

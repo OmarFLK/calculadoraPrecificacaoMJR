@@ -7,6 +7,7 @@ VALID_NUCLEI = {
     "Design",
     "Gestão de Processos",
     "Química e Alimentos",
+    "Arquitetura e Civil",
 }
 
 VALID_COMPLEXITIES = {
@@ -33,8 +34,8 @@ def require_fields(payload: dict[str, Any], fields: list[str]) -> None:
         raise ValidationError(f"Missing required fields: {', '.join(missing_fields)}")
 
 
-def validate_email(email: str) -> None:
-    if not EMAIL_PATTERN.match(email):
+def validate_email(email: object) -> None:
+    if not isinstance(email, str) or not EMAIL_PATTERN.match(email.strip()):
         raise ValidationError(f"Invalid email: received {email}")
 
 

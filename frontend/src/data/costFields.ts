@@ -73,6 +73,11 @@ export const PROJECT_AREAS: Record<Nucleus, ProjectAreaDefinition> = {
       },
     ],
   },
+  "Arquitetura e Civil": {
+    id: "arquitetura-civil",
+    name: "Arquitetura e Civil",
+    specificCostFields: [],
+  },
 };
 
 export function getCostFieldsForArea(area: Nucleus | ""): CostFieldDefinition[] {

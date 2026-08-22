@@ -7,6 +7,7 @@ import {
 } from "../logic/pricingCalculations";
 import type { PricingProject } from "../types/pricing";
 import { calculateServiceMultiplier } from "../data/serviceMultipliers";
+import { calculateArchitecturePricing } from "../logic/architecturePricing";
 import type { MondayDemandSignal } from "./MondayDemandCard";
 
 const apiBaseUrl = import.meta.env.VITE_API_URL ?? "http://127.0.0.1:5000";
@@ -15,6 +16,8 @@ const initialMessage =
 const friendlyErrorMessage = "Não foi possível consultar a IA no momento. Tente novamente.";
 
 interface AiAssistantProps {
+  accessToken: string;
+  onUnauthorized: () => void;
   project: PricingProject;
   projects: PricingProject[];
   mondayDemandSignal?: MondayDemandSignal | null;
@@ -31,7 +34,13 @@ interface ConversationMessage {
   content: string;
 }
 
-export default function AiAssistant({ project, projects, mondayDemandSignal }: AiAssistantProps) {
+export default function AiAssistant({
+  accessToken,
+  onUnauthorized,
+  project,
+  projects,
+  mondayDemandSignal,
+}: AiAssistantProps) {
   const threadRef = useRef<HTMLDivElement | null>(null);
   const [prompt, setPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -72,6 +81,8 @@ export default function AiAssistant({ project, projects, mondayDemandSignal }: A
       projects,
       conversation,
       mondayDemandSignal,
+      accessToken,
+      onUnauthorized,
     );
 
     setMessages((currentMessages) => [
@@ -136,18 +147,28 @@ async function fetchAiAnswer(
   project: PricingProject,
   projects: PricingProject[],
   conversation: ConversationMessage[],
-  mondayDemandSignal?: MondayDemandSignal | null,
+  mondayDemandSignal: MondayDemandSignal | null | undefined,
+  accessToken: string,
+  onUnauthorized: () => void,
 ) {
   try {
     const response = await fetch(`${apiBaseUrl}/ai/chat`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify(buildChatPayload(message, project, projects, conversation, mondayDemandSignal)),
     });
-    const payload = (await response.json()) as { success?: boolean; answer?: string };
+    const payload = (await response.json()) as { success?: boolean; answer?: string; error?: string };
+
+    if (response.status === 401) {
+      onUnauthorized();
+      return "Sua sessão expirou. Entre novamente para continuar.";
+    }
 
     if (!response.ok || !payload.success || !payload.answer) {
-      return payload.answer || friendlyErrorMessage;
+      return payload.answer || payload.error || friendlyErrorMessage;
     }
 
     return payload.answer;
@@ -164,6 +185,7 @@ function buildChatPayload(
   mondayDemandSignal?: MondayDemandSignal | null,
 ) {
   const calculation = calculateSuggestedPrice(project);
+  const architectureCalculation = calculateArchitecturePricing(project);
   const historicalSuggestion = calculateHistoricalSuggestion(project, projects);
   const serviceMultiplier = calculateServiceMultiplier(
     project.nucleus,
@@ -196,6 +218,8 @@ function buildChatPayload(
       serviceVariablesComplete: serviceMultiplier.answeredCount === serviceMultiplier.totalQuestions,
       serviceVariablesNeedReview: serviceMultiplier.reviewRequired,
       mondayDemandSignal,
+      architecturePricing: project.architecturePricing,
+      architectureCalculation,
       historicalSuggestion,
     },
   };

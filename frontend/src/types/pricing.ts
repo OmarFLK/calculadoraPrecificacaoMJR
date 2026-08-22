@@ -3,7 +3,8 @@ export type Nucleus =
   | "Gestão Empresarial"
   | "Design"
   | "Gestão de Processos"
-  | "Química e Alimentos";
+  | "Química e Alimentos"
+  | "Arquitetura e Civil";
 
 export type TimeUnit = "dias" | "semanas" | "meses";
 
@@ -20,6 +21,16 @@ export interface AdditionalCost {
   id: string;
   description: string;
   amount: CostFieldValue;
+}
+
+export type ArchitectureFinishLevel = 1 | 2 | 3 | "";
+
+export interface ArchitecturePricingInputs {
+  artIssuanceCost: CostFieldValue;
+  finishLevel: ArchitectureFinishLevel;
+  professorArtCost: CostFieldValue;
+  sheetAreas: CostFieldValue[];
+  workHoursPerConsultant: CostFieldValue;
 }
 
 export interface PricingProject {
@@ -45,6 +56,7 @@ export interface PricingProject {
   complexity: Complexity | "";
   complexityMultiplier: number | "";
   serviceMultiplierValues: Record<string, string>;
+  architecturePricing: ArchitecturePricingInputs;
   context: string;
   driveLink: string;
 }
@@ -58,6 +70,20 @@ export interface PricingCalculation {
   multiplicadorComplexidade: number;
   multiplicadorServico: number;
   precoFinal: number;
+}
+
+export interface ArchitecturePricingCalculation {
+  areaValue: number;
+  consultantLaborCost: number;
+  finishLevel: ArchitectureFinishLevel;
+  grossValue: number;
+  indirectCosts: number;
+  netValue: number;
+  sheetCount: number;
+  squareMeterRate: number;
+  taxAmount: number;
+  totalCost: number;
+  totalSquareMeters: number;
 }
 
 export interface HistoricalPricingSuggestion {

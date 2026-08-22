@@ -1,30 +1,36 @@
-import { LockKeyhole, LogIn, Mail } from "lucide-react";
+import { Loader2, LockKeyhole, LogIn, Mail } from "lucide-react";
 import { FormEvent, useState } from "react";
+import { AuthError } from "../api/auth";
 import headerImage from "../assets/maua-header.jpg";
 import teamImage from "../assets/maua-team.png";
 
 interface LoginPageProps {
-  onLogin: () => void;
+  onLogin: (email: string, password: string) => Promise<void>;
 }
 
-const adminEmail = "adm@mauajr.com";
-const adminPassword = "adm123";
-
 export default function LoginPage({ onLogin }: LoginPageProps) {
-  const [email, setEmail] = useState(adminEmail);
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const submitLogin = (event: FormEvent<HTMLFormElement>) => {
+  const submitLogin = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (email.trim() === adminEmail && password === adminPassword) {
-      setErrorMessage("");
-      onLogin();
+    if (isLoading) {
       return;
     }
 
-    setErrorMessage("E-mail ou senha inválidos.");
+    setErrorMessage("");
+    setIsLoading(true);
+
+    try {
+      await onLogin(email, password);
+    } catch (error) {
+      setErrorMessage(error instanceof AuthError ? error.message : "Não foi possível entrar no sistema.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -50,7 +56,10 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
               <input
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                placeholder="adm@mauajr.com"
+                autoComplete="username"
+                disabled={isLoading}
+                placeholder="seu.email@mauajr.com"
+                required
                 type="email"
               />
             </div>
@@ -63,7 +72,10 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
               <input
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
-                placeholder="adm123"
+                autoComplete="current-password"
+                disabled={isLoading}
+                placeholder="Sua senha"
+                required
                 type="password"
               />
             </div>
@@ -71,9 +83,9 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
 
           {errorMessage ? <div className="login-error">{errorMessage}</div> : null}
 
-          <button className="primary-button" type="submit">
-            <LogIn size={16} aria-hidden="true" />
-            Entrar
+          <button className="primary-button" type="submit" disabled={isLoading}>
+            {isLoading ? <Loader2 className="spin" size={16} aria-hidden="true" /> : <LogIn size={16} aria-hidden="true" />}
+            {isLoading ? "Entrando..." : "Entrar"}
           </button>
         </form>
       </section>

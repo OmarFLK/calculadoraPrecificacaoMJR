@@ -1,4 +1,13 @@
+import { Loader2 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  clearAccessToken,
+  getCurrentUser,
+  getStoredAccessToken,
+  login as authenticate,
+  storeAccessToken,
+  type AuthUser,
+} from "./api/auth";
 import AiAssistant from "./components/AiAssistant";
 import ContextModal from "./components/ContextModal";
 import Footer from "./components/Footer";
@@ -17,6 +26,11 @@ const normalizeProject = (project: PricingProject): PricingProject => ({
   ...createEmptyPricingProject(project.id),
   ...project,
   serviceMultiplierValues: project.serviceMultiplierValues ?? {},
+  architecturePricing: {
+    ...createEmptyPricingProject(project.id).architecturePricing,
+    ...project.architecturePricing,
+    sheetAreas: project.architecturePricing?.sheetAreas ?? [],
+  },
 });
 
 const loadStoredProjects = (): PricingProject[] => {
@@ -43,9 +57,9 @@ const loadStoredProjects = (): PricingProject[] => {
 
 export default function App() {
   const saveMessageTimeoutRef = useRef<number | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(
-    () => window.sessionStorage.getItem("maua-pricing-authenticated") === "true",
-  );
+  const [accessToken, setAccessToken] = useState<string | null>(getStoredAccessToken);
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
+  const [isCheckingSession, setIsCheckingSession] = useState(() => Boolean(getStoredAccessToken()));
   const [projects, setProjects] = useState<PricingProject[]>(loadStoredProjects);
   const [selectedProjectId, setSelectedProjectId] = useState(() => projects[0].id);
   const [activeContextProjectId, setActiveContextProjectId] = useState<string | null>(null);
@@ -66,6 +80,38 @@ export default function App() {
   useEffect(() => {
     window.localStorage.setItem(PROJECT_STORAGE_KEY, JSON.stringify(projects));
   }, [projects]);
+
+  useEffect(() => {
+    if (!accessToken) {
+      setIsCheckingSession(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    getCurrentUser(accessToken)
+      .then((user) => {
+        if (!cancelled) {
+          setCurrentUser(user);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          clearAccessToken();
+          setAccessToken(null);
+          setCurrentUser(null);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setIsCheckingSession(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [accessToken]);
 
   useEffect(() => () => {
     if (saveMessageTimeoutRef.current !== null) {
@@ -131,23 +177,35 @@ export default function App() {
     saveMessageTimeoutRef.current = window.setTimeout(() => setSaveMessage(""), 4200);
   };
 
-  const login = () => {
-    window.sessionStorage.setItem("maua-pricing-authenticated", "true");
-    setIsAuthenticated(true);
+  const login = async (email: string, password: string) => {
+    const session = await authenticate(email, password);
+    storeAccessToken(session.accessToken);
+    setCurrentUser(session.user);
+    setAccessToken(session.accessToken);
   };
 
   const logout = () => {
-    window.sessionStorage.removeItem("maua-pricing-authenticated");
-    setIsAuthenticated(false);
+    clearAccessToken();
+    setAccessToken(null);
+    setCurrentUser(null);
   };
 
-  if (!isAuthenticated) {
+  if (isCheckingSession) {
+    return (
+      <main className="session-loading" aria-live="polite">
+        <Loader2 className="spin" size={26} aria-hidden="true" />
+        <p>Validando sessão...</p>
+      </main>
+    );
+  }
+
+  if (!accessToken || !currentUser) {
     return <LoginPage onLogin={login} />;
   }
 
   return (
     <>
-      <Header onLogout={logout} />
+      <Header userName={currentUser.name} onLogout={logout} />
 
       <main className="app-shell page-stack">
         <PricingForm
@@ -161,7 +219,13 @@ export default function App() {
           onUpdateProject={updateProject}
         />
         <ResultCard project={activeProject} projects={projects} mondayDemandSignal={mondayDemandSignal} />
-        <AiAssistant project={activeProject} projects={projects} mondayDemandSignal={mondayDemandSignal} />
+        <AiAssistant
+          accessToken={accessToken}
+          onUnauthorized={logout}
+          project={activeProject}
+          projects={projects}
+          mondayDemandSignal={mondayDemandSignal}
+        />
         <MondayDemandCard area={activeProject.nucleus} onSignalChange={setMondayDemandSignal} />
       </main>
 

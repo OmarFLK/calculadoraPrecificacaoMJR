@@ -4,6 +4,7 @@ import type {
   PricingProject,
 } from "../types/pricing";
 import { calculateServiceMultiplier } from "../data/serviceMultipliers";
+import { calculateArchitecturePricing } from "./architecturePricing";
 
 const toMoneyNumber = (value: number | "") => (value === "" ? 0 : value);
 
@@ -29,6 +30,21 @@ export const calculateSuggestedPrice = (
       multiplicadorComplexidade: 1,
       multiplicadorServico: 1,
       precoFinal: 0,
+    };
+  }
+
+  const architectureCalculation = calculateArchitecturePricing(project);
+
+  if (architectureCalculation) {
+    return {
+      custoBase: architectureCalculation.totalCost,
+      custosDinamicos: architectureCalculation.indirectCosts,
+      valorMargem: architectureCalculation.grossValue,
+      valorImpostos: architectureCalculation.netValue,
+      multiplicador: 1,
+      multiplicadorComplexidade: 1,
+      multiplicadorServico: 1,
+      precoFinal: architectureCalculation.grossValue,
     };
   }
 

@@ -1,10 +1,12 @@
 from functools import wraps
 from datetime import datetime, timezone
 from typing import Callable, ParamSpec, TypeVar
+from uuid import UUID
 
 import jwt
 from flask import current_app, jsonify, request
 
+from extensions import db
 from models.user import User
 
 P = ParamSpec("P")
@@ -29,10 +31,11 @@ def get_current_user() -> User | None:
 
     try:
         payload = jwt.decode(token, current_app.config["JWT_SECRET_KEY"], algorithms=["HS256"])
-    except jwt.PyJWTError:
+        user_id = UUID(payload["sub"])
+    except (jwt.PyJWTError, KeyError, TypeError, ValueError):
         return None
 
-    return User.query.get(payload["sub"])
+    return db.session.get(User, user_id)
 
 
 def login_required(route_handler: Callable[P, R]) -> Callable[P, R]:

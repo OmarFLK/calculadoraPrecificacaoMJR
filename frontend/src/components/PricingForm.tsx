@@ -1,8 +1,10 @@
 import { FileText, Plus, RotateCcw, Save, Trash2 } from "lucide-react";
+import ArchitecturePricingFields from "./ArchitecturePricingFields";
 import DynamicCostFields from "./DynamicCostFields";
 import ServiceMultiplierFields from "./ServiceMultiplierFields";
 import { getUniversalCostValueIds } from "../data/costFields";
 import { COMPLEXITY_MULTIPLIERS, NUCLEUS_SERVICES, TIME_UNITS } from "../data/services";
+import { isArchitectureProject } from "../logic/architecturePricing";
 import type {
   AdditionalCost,
   Complexity,
@@ -44,6 +46,7 @@ export default function PricingForm({
   onUpdateProject,
 }: PricingFormProps) {
   const services = project.nucleus ? NUCLEUS_SERVICES[project.nucleus] : [];
+  const isArchitecture = isArchitectureProject(project);
 
   const updateNumber = (fieldName: NumericField, rawValue: string) => {
     onUpdateProject(project.id, { [fieldName]: rawValue === "" ? "" : Number(rawValue) });
@@ -156,6 +159,10 @@ export default function PricingForm({
           />
         </div>
 
+        {isArchitecture ? (
+          <ArchitecturePricingFields project={project} onUpdateProject={onUpdateProject} />
+        ) : null}
+
         <DynamicCostFields
           area={project.nucleus}
           values={project.costValues}
@@ -164,7 +171,8 @@ export default function PricingForm({
           onChangeAdditionalCosts={updateAdditionalCosts}
         />
 
-        <div className="form-grid three-columns">
+        {!isArchitecture ? <>
+          <div className="form-grid three-columns">
           <NumberField
             label="Tempo de execução"
             value={project.executionTime}
@@ -183,9 +191,9 @@ export default function PricingForm({
             onChange={(value) => updateNumber("totalWorkedHours", value)}
             placeholder="Ex: 180"
           />
-        </div>
+          </div>
 
-        <div className="form-grid three-columns">
+          <div className="form-grid three-columns">
           <NumberField
             label="Quantidade de consultores"
             value={project.consultantsCount}
@@ -204,9 +212,9 @@ export default function PricingForm({
             onChange={(value) => updateNumber("hourValue", value)}
             placeholder="Ex: 60"
           />
-        </div>
+          </div>
 
-        <div className="form-grid three-columns">
+          <div className="form-grid three-columns">
           <NumberField
             label="Margem de lucro desejada"
             value={project.desiredProfitMargin}
@@ -228,16 +236,18 @@ export default function PricingForm({
             options={Object.keys(COMPLEXITY_MULTIPLIERS)}
             placeholder="Selecione"
           />
-        </div>
+          </div>
 
-        <div className="form-grid two-columns">
           <TextField
-            label="Multiplicador de complexidade"
-            value={String(project.complexityMultiplier)}
-            onChange={() => undefined}
-            placeholder="Auto"
-            readOnly
-          />
+              label="Multiplicador de complexidade"
+              value={String(project.complexityMultiplier)}
+              onChange={() => undefined}
+              placeholder="Auto"
+              readOnly
+            />
+        </> : null}
+
+        <div className="form-grid two-columns architecture-drive-row">
           <TextField
             label="Link do Drive"
             value={project.driveLink}

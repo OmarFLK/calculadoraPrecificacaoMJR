@@ -32,6 +32,11 @@ export const NUCLEUS_SERVICES: Record<Nucleus, string[]> = {
     "Análise de Componentes",
     "Manual BPF",
   ],
+  "Arquitetura e Civil": [
+    "Projeto Arquitetônico — Concepção",
+    "Projeto Arquitetônico — Interiores",
+    "Projeto Elétrico",
+  ],
 };
 
 export const COMPLEXITY_MULTIPLIERS: Record<Complexity, number> = {
@@ -66,6 +71,13 @@ export const createEmptyPricingProject = (id: string): PricingProject => ({
   complexity: "",
   complexityMultiplier: "",
   serviceMultiplierValues: {},
+  architecturePricing: {
+    artIssuanceCost: "",
+    finishLevel: "",
+    professorArtCost: "",
+    sheetAreas: [],
+    workHoursPerConsultant: "",
+  },
   context: "",
   driveLink: "",
 });

@@ -124,9 +124,9 @@ Monday.com GraphQL API
 
 ### Autenticacao:
 
-- login simples no frontend para acesso ao MVP
-- backend preparado com registro, login e rota `/auth/me`
-- JWT para rotas protegidas
+- login do frontend integrado ao backend
+- sessao JWT validada pela rota `/auth/me` ao recarregar a pagina
+- JWT enviado nas rotas protegidas e removido no logout ou ao expirar
 - hash seguro de senha
 
 ### Calculadora de Precificacao:
@@ -163,6 +163,23 @@ valor_com_margem = custo_base * (1 + margem / 100)
 valor_com_impostos = valor_com_margem * (1 + impostos / 100)
 preco_final = (valor_com_impostos * multiplicador_complexidade) + custos_extras
 ```
+
+Para o nucleo **Arquitetura e Civil**, a calculadora segue a planilha oficial:
+
+```txt
+area_total = soma(area_de_cada_folha)
+valor_area = area_total * valor_m2_por_servico_e_acabamento
+custo = deslocamento + ART_professores + emissao_ART + custos_extras
+        + (valor_hora * consultores * horas_por_consultor)
+valor_bruto = valor_area + custo
+imposto = valor_bruto * taxa_imposto
+valor_liquido = valor_bruto - imposto
+```
+
+Os valores por m² são `25/30/35` para Concepção e Elétrico e `30/35/40`
+para Interiores, nos níveis de acabamento 1, 2 e 3 respectivamente. A tabela
+de Interiores foi adotada como referência porque a fórmula antiga da planilha
+ainda apontava para os valores de Concepção.
 
 ### Base historica:
 
@@ -235,6 +252,11 @@ Quimica e Alimentos
   - Neutralizacao de Carbono
   - Rotulagem de Produtos
   - Estudo de Embalagem
+
+Arquitetura e Civil
+  - Projeto Arquitetônico — Concepção
+  - Projeto Arquitetônico — Interiores
+  - Projeto Elétrico
 ```
 
 ---

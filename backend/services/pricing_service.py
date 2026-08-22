@@ -1,7 +1,7 @@
 from typing import Any
 
 from models.pricing_simulation import PricingSimulation
-from utils.validators import get_float, get_int, require_fields, validate_positive_number
+from utils.validators import ValidationError, get_float, get_int, require_fields, validate_positive_number
 
 PRICING_REQUIRED_FIELDS = [
     "project_name",
@@ -10,8 +10,20 @@ PRICING_REQUIRED_FIELDS = [
     "desired_profit_margin",
 ]
 
+ARCHITECTURE_NUCLEUS = "Arquitetura e Civil"
+ARCHITECTURE_SQUARE_METER_RATES = {
+    "Projeto Arquitetônico — Concepção": {1: 25, 2: 30, 3: 35},
+    # A tabela de Interiores informa 30/35/40, embora as fórmulas da planilha
+    # ainda apontem para 25/30/35. A tabela específica é a regra adotada.
+    "Projeto Arquitetônico — Interiores": {1: 30, 2: 35, 3: 40},
+    "Projeto Elétrico": {1: 25, 2: 30, 3: 35},
+}
+
 
 def calculate_pricing(payload: dict[str, Any], multiplier: float = 1.0) -> dict[str, Any]:
+    if payload.get("nucleus") == ARCHITECTURE_NUCLEUS:
+        return calculate_architecture_pricing(payload)
+
     validate_pricing_payload(payload)
 
     total_hours = get_float(payload, "total_worked_hours")
@@ -45,6 +57,100 @@ def calculate_pricing(payload: dict[str, Any], multiplier: float = 1.0) -> dict[
             "taxes_percentage": taxes,
             "extra_costs": extra_costs,
             "formula": "((hours * hour_value) * margin) * taxes * complexity * service_variables + extra_costs",
+        },
+    }
+
+
+def calculate_architecture_pricing(payload: dict[str, Any]) -> dict[str, Any]:
+    required_fields = [
+        "project_name",
+        "service",
+        "sheet_areas",
+        "finish_level",
+        "consultants_count",
+        "average_hour_value",
+        "hours_per_consultant",
+    ]
+    require_fields(payload, required_fields)
+
+    service = payload["service"]
+    if service not in ARCHITECTURE_SQUARE_METER_RATES:
+        raise ValidationError(f"Invalid architecture service: received {service}")
+
+    try:
+        finish_level_value = float(payload["finish_level"])
+    except (TypeError, ValueError) as error:
+        raise ValidationError("Invalid finish_level: expected 1, 2 or 3") from error
+
+    if finish_level_value not in (1, 2, 3):
+        raise ValidationError("Invalid finish_level: expected 1, 2 or 3")
+
+    finish_level = int(finish_level_value)
+
+    sheet_areas = payload["sheet_areas"]
+    if not isinstance(sheet_areas, list) or not sheet_areas:
+        raise ValidationError("Invalid sheet_areas: expected a non-empty list")
+
+    try:
+        normalized_areas = [float(area) for area in sheet_areas]
+    except (TypeError, ValueError) as error:
+        raise ValidationError("Invalid sheet_areas: expected non-negative numbers") from error
+
+    if any(area < 0 for area in normalized_areas):
+        raise ValidationError("Invalid sheet_areas: expected non-negative numbers")
+
+    numeric_fields = [
+        "consultants_count",
+        "average_hour_value",
+        "hours_per_consultant",
+        "transport_cost",
+        "professor_art_cost",
+        "art_issuance_cost",
+        "taxes_percentage",
+        "taxes",
+        "extra_costs",
+    ]
+    for field in numeric_fields:
+        validate_positive_number(payload, field)
+
+    square_meter_rate = ARCHITECTURE_SQUARE_METER_RATES[service][finish_level]
+    total_square_meters = sum(normalized_areas)
+    consultant_labor_cost = (
+        get_float(payload, "average_hour_value")
+        * get_float(payload, "consultants_count")
+        * get_float(payload, "hours_per_consultant")
+    )
+    indirect_costs = (
+        get_float(payload, "transport_cost")
+        + get_float(payload, "professor_art_cost")
+        + get_float(payload, "art_issuance_cost")
+        + get_float(payload, "extra_costs")
+    )
+    total_cost = consultant_labor_cost + indirect_costs
+    area_value = total_square_meters * square_meter_rate
+    gross_value = area_value + total_cost
+    taxes = get_float(payload, "taxes_percentage", get_float(payload, "taxes"))
+    tax_amount = gross_value * (taxes / 100)
+    net_value = gross_value - tax_amount
+
+    return {
+        "pricing_method": "architecture_spreadsheet",
+        "sheet_count": len(normalized_areas),
+        "total_square_meters": round(total_square_meters, 2),
+        "square_meter_rate": round(square_meter_rate, 2),
+        "area_value": round(area_value, 2),
+        "consultant_labor_cost": round(consultant_labor_cost, 2),
+        "indirect_costs": round(indirect_costs, 2),
+        "total_cost": round(total_cost, 2),
+        "gross_value": round(gross_value, 2),
+        "tax_amount": round(tax_amount, 2),
+        "net_value": round(net_value, 2),
+        "final_price": round(gross_value, 2),
+        "breakdown": {
+            "finish_level": finish_level,
+            "sheet_areas": normalized_areas,
+            "taxes_percentage": taxes,
+            "formula": "gross = (sum(sheet_areas) * square_meter_rate) + indirect_costs + (hour_value * consultants * hours_per_consultant); net = gross - tax",
         },
     }
 

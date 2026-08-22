@@ -46,6 +46,11 @@ NUCLEI_AND_SERVICES = {
         "Análise de Componentes",
         "Manual BPF",
     ],
+    "Arquitetura e Civil": [
+        "Projeto Arquitetônico — Concepção",
+        "Projeto Arquitetônico — Interiores",
+        "Projeto Elétrico",
+    ],
 }
 
 COMPLEXITIES = [

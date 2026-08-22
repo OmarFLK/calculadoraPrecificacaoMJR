@@ -97,6 +97,11 @@ GET /health
 
 Envie `Authorization: Bearer <token>` nos endpoints protegidos.
 
+`POST /pricing/calculate` também aceita o método da planilha de Arquitetura e
+Civil quando `nucleus` for `Arquitetura e Civil`. Nesse caso, envie `service`,
+`sheet_areas`, `finish_level`, `consultants_count`, `average_hour_value`,
+`hours_per_consultant`, os custos indiretos e a taxa de imposto.
+
 ## Monday.com
 
 O client usa a API GraphQL oficial, fixa a versão estável configurada em
